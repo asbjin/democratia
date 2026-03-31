@@ -5,8 +5,8 @@ set -euo pipefail
 # Team members:
 #   1 - Tebti Mohamed Anis (IA / Tech Lead)
 #   2 - Rais Walid (Backend)
-#   3 - Aiche Youva (Frontend)
-#   4 - Ceran Mohamed (ETL / Data)
+#   3 - Aiche Youva (Data / ETL)
+#   4 - Ceran Mohamed (Frontend)
 #   5 - Chabla Yassine (DevOps)
 
 if [ $# -lt 2 ]; then
@@ -14,8 +14,8 @@ if [ $# -lt 2 ]; then
     echo ""
     echo "  1 - Tebti Mohamed Anis (IA / Tech Lead)"
     echo "  2 - Rais Walid (Backend)"
-    echo "  3 - Aiche Youva (Frontend)"
-    echo "  4 - Ceran Mohamed (ETL / Data)"
+    echo "  3 - Aiche Youva (Data / ETL)"
+    echo "  4 - Ceran Mohamed (Frontend)"
     echo "  5 - Chabla Yassine (DevOps)"
     exit 1
 fi

@@ -27,23 +27,23 @@ MESSAGE="$*"
 case $MEMBER in
     1)
         NAME="Tebti Mohamed Anis"
-        EMAIL="anis.tebti@democratia.dev"
+        EMAIL="anistebti10@gmail.com"
         ;;
     2)
         NAME="Rais Walid"
-        EMAIL="walid.rais@democratia.dev"
+        EMAIL="raiiswalid@gmail.com"
         ;;
     3)
         NAME="Aiche Youva"
-        EMAIL="youva.aiche@democratia.dev"
+        EMAIL="youvasin02@gmail.com"
         ;;
     4)
         NAME="Ceran Mohamed"
-        EMAIL="mohamed.ceran@democratia.dev"
+        EMAIL="daddy93.ms@gmail.com"
         ;;
     5)
         NAME="Chabla Yassine"
-        EMAIL="yassine.chabla@democratia.dev"
+        EMAIL="yassinechabla@gmail.com"
         ;;
     *)
         echo "Error: member number must be between 1 and 5"

@@ -8,11 +8,11 @@ DemocratIA permet aux citoyens de rechercher, visualiser et comprendre l'activit
 
 | Nom | Role | Email |
 |-----|------|-------|
-| Tebti Mohamed Anis | IA / Tech Lead | anis.tebti@democratia.dev |
-| Rais Walid | Backend | walid.rais@democratia.dev |
-| Aiche Youva | Frontend | youva.aiche@democratia.dev |
-| Ceran Mohamed | ETL / Data | mohamed.ceran@democratia.dev |
-| Chabla Yassine | DevOps | yassine.chabla@democratia.dev |
+| Tebti Mohamed Anis | IA / Tech Lead | anistebti10@gmail.com |
+| Rais Walid | Backend | raiiswalid@gmail.com |
+| Aiche Youva | Data / ETL | youvasin02@gmail.com |
+| Ceran Mohamed | Frontend | daddy93.ms@gmail.com |
+| Chabla Yassine | DevOps | yassinechabla@gmail.com |
 
 ## Stack technique
 

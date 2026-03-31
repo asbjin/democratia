@@ -1,28 +1,12 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import {
-  BarChart,
-  Bar,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
 import api from "../services/api";
 import DeputeCard from "../components/DeputeCard";
 import SearchBar from "../components/SearchBar";
-
-function StatCard({ label, value }) {
-  return (
-    <div className="bg-white rounded-lg shadow p-6 text-center">
-      <p className="text-3xl font-bold text-accent">{value}</p>
-      <p className="text-sm text-gray-500 mt-1">{label}</p>
-    </div>
-  );
-}
+import StatCard from "../components/StatCard";
+import ActivityChart from "../components/ActivityChart";
+import TimelineChart from "../components/TimelineChart";
+import VoteBreakdown from "../components/VoteBreakdown";
 
 function DashboardPage() {
   const [searchParams] = useSearchParams();
@@ -30,6 +14,8 @@ function DashboardPage() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [departement, setDepartement] = useState("");
+  const [scrutins, setScrutins] = useState([]);
 
   useEffect(() => {
     setLoading(true);
@@ -37,13 +23,19 @@ function DashboardPage() {
 
     const params = {};
     if (query) params.theme = query;
+    if (departement) params.departement = departement;
 
-    api
-      .get("/dashboard", { params })
-      .then((res) => setData(res.data))
-      .catch((err) => setError("Erreur lors du chargement des donnees"))
+    Promise.all([
+      api.get("/dashboard", { params }),
+      api.get("/scrutins", { params: { theme: query || undefined, size: 5 } }),
+    ])
+      .then(([dashRes, scrutinRes]) => {
+        setData(dashRes.data);
+        setScrutins(scrutinRes.data.items || []);
+      })
+      .catch(() => setError("Erreur lors du chargement des donnees"))
       .finally(() => setLoading(false));
-  }, [query]);
+  }, [query, departement]);
 
   if (loading) {
     return (
@@ -68,6 +60,31 @@ function DashboardPage() {
         <SearchBar />
       </div>
 
+      {/* Department filter */}
+      <div className="mb-6 flex items-center gap-4">
+        <label htmlFor="dept-filter" className="text-sm font-medium text-gray-700">
+          Filtrer par departement :
+        </label>
+        <select
+          id="dept-filter"
+          value={departement}
+          onChange={(e) => setDepartement(e.target.value)}
+          className="px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:border-primary"
+        >
+          <option value="">Tous les departements</option>
+          <option value="Paris">Paris</option>
+          <option value="Bouches-du-Rhone">Bouches-du-Rhone</option>
+          <option value="Nord">Nord</option>
+          <option value="Rhone">Rhone</option>
+          <option value="Gironde">Gironde</option>
+          <option value="Hauts-de-Seine">Hauts-de-Seine</option>
+          <option value="Seine-Saint-Denis">Seine-Saint-Denis</option>
+          <option value="Val-de-Marne">Val-de-Marne</option>
+          <option value="Yvelines">Yvelines</option>
+          <option value="Essonne">Essonne</option>
+        </select>
+      </div>
+
       {query && (
         <h2 className="text-2xl font-bold text-primary mb-6">
           Resultats pour : &laquo; {query} &raquo;
@@ -80,17 +97,29 @@ function DashboardPage() {
           <StatCard
             label="Deputes actifs"
             value={data.stats.nb_deputes.toLocaleString("fr-FR")}
+            subtext="dans la legislature en cours"
+            color="text-blue-600"
           />
           <StatCard
             label="Interventions"
             value={data.stats.nb_interventions.toLocaleString("fr-FR")}
+            subtext="en seance publique"
+            color="text-green-600"
           />
           <StatCard
             label="Scrutins"
             value={data.stats.nb_scrutins.toLocaleString("fr-FR")}
+            subtext="votes enregistres"
+            color="text-purple-600"
           />
         </div>
       )}
+
+      {/* Charts grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+        {data?.par_groupe?.length > 0 && <ActivityChart data={data.par_groupe} />}
+        {data?.timeline?.length > 0 && <TimelineChart data={data.timeline} />}
+      </div>
 
       {/* Top deputes */}
       {data?.top_deputes?.length > 0 && (
@@ -106,48 +135,16 @@ function DashboardPage() {
         </section>
       )}
 
-      {/* Par groupe - BarChart */}
-      {data?.par_groupe?.length > 0 && (
+      {/* Vote breakdowns */}
+      {scrutins.length > 0 && (
         <section className="mb-10">
           <h3 className="text-xl font-semibold text-primary mb-4">
-            Deputes par groupe politique
+            Derniers scrutins
           </h3>
-          <div className="bg-white rounded-lg shadow p-6">
-            <ResponsiveContainer width="100%" height={350}>
-              <BarChart data={data.par_groupe}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="groupe" tick={{ fontSize: 12 }} />
-                <YAxis />
-                <Tooltip />
-                <Bar dataKey="count" fill="#2E75B6" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </section>
-      )}
-
-      {/* Timeline - AreaChart */}
-      {data?.timeline?.length > 0 && (
-        <section className="mb-10">
-          <h3 className="text-xl font-semibold text-primary mb-4">
-            Interventions par mois
-          </h3>
-          <div className="bg-white rounded-lg shadow p-6">
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={data.timeline}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="period" tick={{ fontSize: 11 }} />
-                <YAxis />
-                <Tooltip />
-                <Area
-                  type="monotone"
-                  dataKey="count"
-                  stroke="#1B3A5C"
-                  fill="#2E75B6"
-                  fillOpacity={0.3}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {scrutins.map((s) => (
+              <VoteBreakdown key={s.id} scrutin={s} />
+            ))}
           </div>
         </section>
       )}

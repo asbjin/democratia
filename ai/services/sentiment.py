@@ -1,4 +1,4 @@
-"""Sentiment analysis service using Claude API."""
+"""Sentiment analysis service using LLM API."""
 
 import json
 

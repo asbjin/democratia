@@ -1,4 +1,4 @@
-"""Summarization service using Claude API."""
+"""Summarization service using LLM API."""
 
 import anthropic
 from tenacity import retry, stop_after_attempt, wait_exponential

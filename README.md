@@ -20,7 +20,7 @@ DemocratIA permet aux citoyens de rechercher, visualiser et comprendre l'activit
 - **Frontend** : React 18, Vite, Tailwind CSS, Recharts
 - **Base de donnees** : PostgreSQL 16 (avec pg_trgm et unaccent)
 - **ETL** : Python, requests, SQLAlchemy
-- **IA** : Claude API (Anthropic), tenacity
+- **IA** : LLM API, tenacity
 - **Infrastructure** : Docker Compose, Nginx
 - **Donnees** : Open Data Assemblee Nationale (https://data.assemblee-nationale.fr/)
 
@@ -37,7 +37,7 @@ DemocratIA permet aux citoyens de rechercher, visualiser et comprendre l'activit
    cp .env.example .env
    ```
 
-3. Modifier `.env` avec vos propres valeurs (cle API Anthropic, etc.)
+3. Modifier `.env` avec vos propres valeurs (cle API LLM, etc.)
 
 4. Lancer les services :
    ```bash

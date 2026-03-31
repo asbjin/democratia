@@ -10,6 +10,8 @@ from sqlalchemy.orm import declarative_base, sessionmaker
 from download import download_all
 from parse_acteurs import parse_all_acteurs
 from parse_scrutins import parse_all_scrutins
+from parse_questions import parse_all_questions
+from parse_amendements import parse_all_amendements
 
 logging.basicConfig(
     level=logging.INFO,
@@ -57,6 +59,30 @@ class Vote(Base):
     scrutin_id = Column(String, ForeignKey("scrutins.id"), nullable=False)
     depute_id = Column(String, ForeignKey("deputes.id"), nullable=False)
     position = Column(String, nullable=False)
+
+
+class Question(Base):
+    __tablename__ = "questions"
+
+    id = Column(String, primary_key=True)
+    depute_id = Column(String, ForeignKey("deputes.id"), nullable=False)
+    date = Column(String)
+    theme = Column(String)
+    texte = Column(Text)
+    reponse = Column(Text)
+    ministere = Column(String)
+
+
+class Amendement(Base):
+    __tablename__ = "amendements"
+
+    id = Column(String, primary_key=True)
+    depute_id = Column(String, ForeignKey("deputes.id"), nullable=False)
+    dossier_id = Column(String, nullable=True)
+    texte = Column(Text)
+    sort = Column(String)
+    date = Column(String)
+    objet = Column(Text)
 
 
 def import_deputes(session, acteurs: list[dict]):
@@ -124,6 +150,66 @@ def import_scrutins(session, scrutins: list[dict], votes: list[dict]):
     logger.info(f"Imported {vote_count} votes")
 
 
+def import_questions(session, questions: list[dict]):
+    """Insert questions, skipping duplicates by ID."""
+    existing_depute_ids = {d.id for d in session.query(Depute.id).all()}
+    count = 0
+    for q in questions:
+        if q["depute_id"] not in existing_depute_ids:
+            continue
+        existing = session.get(Question, q["id"])
+        if existing is not None:
+            continue
+        question = Question(
+            id=q["id"],
+            depute_id=q["depute_id"],
+            date=q.get("date", ""),
+            theme=q.get("theme", ""),
+            texte=q.get("texte", ""),
+            reponse=q.get("reponse", ""),
+            ministere=q.get("ministere", ""),
+        )
+        session.add(question)
+        count += 1
+
+        if count % 1000 == 0:
+            session.commit()
+            logger.info(f"  ... {count} questions imported so far")
+
+    session.commit()
+    logger.info(f"Imported {count} new questions")
+
+
+def import_amendements(session, amendements: list[dict]):
+    """Insert amendements, skipping duplicates by ID."""
+    existing_depute_ids = {d.id for d in session.query(Depute.id).all()}
+    count = 0
+    for a in amendements:
+        if a["depute_id"] not in existing_depute_ids:
+            continue
+        existing = session.get(Amendement, a["id"])
+        if existing is not None:
+            continue
+        amendement = Amendement(
+            id=a["id"],
+            depute_id=a["depute_id"],
+            dossier_id=a.get("dossier_id", ""),
+            texte=a.get("texte", ""),
+            sort=a.get("sort", ""),
+            date=a.get("date", ""),
+            objet=a.get("objet", ""),
+        )
+        session.add(amendement)
+        count += 1
+
+        if count % 1000 == 0:
+            session.commit()
+            logger.info(f"  ... {count} amendements imported so far")
+
+    session.commit()
+    logger.info(f"Imported {count} new amendements")
+
+
 def main():
     logger.info("=== DemocratIA ETL Pipeline ===")
 
@@ -140,12 +226,20 @@ def main():
     acteurs = []
     scrutins = []
     votes = []
+    questions = []
+    amendements = []
 
     if "acteurs" in datasets:
         acteurs = parse_all_acteurs(datasets["acteurs"])
 
     if "scrutins" in datasets:
         scrutins, votes = parse_all_scrutins(datasets["scrutins"])
+
+    if "questions" in datasets:
+        questions = parse_all_questions(datasets["questions"])
+
+    if "amendements" in datasets:
+        amendements = parse_all_amendements(datasets["amendements"])
 
     # Step 3: Import to database
     logger.info("Step 3: Importing to PostgreSQL...")
@@ -159,6 +253,10 @@ def main():
             import_deputes(session, acteurs)
         if scrutins:
             import_scrutins(session, scrutins, votes)
+        if questions:
+            import_questions(session, questions)
+        if amendements:
+            import_amendements(session, amendements)
 
         logger.info("=== ETL Pipeline completed successfully ===")
     except Exception as e:

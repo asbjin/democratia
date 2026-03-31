@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from .database import engine, Base
-from .routers import health, deputes, search, dashboard, scrutins, groupes
+from .routers import health, deputes, search, dashboard, scrutins, groupes, ia
 
 app = FastAPI(
     title="DemocratIA API",
@@ -26,6 +26,7 @@ app.include_router(search.router, prefix="/api", tags=["search"])
 app.include_router(dashboard.router, prefix="/api", tags=["dashboard"])
 app.include_router(scrutins.router, prefix="/api", tags=["scrutins"])
 app.include_router(groupes.router, prefix="/api", tags=["groupes"])
+app.include_router(ia.router, prefix="/api", tags=["ia"])
 
 
 @app.on_event("startup")

@@ -8,6 +8,7 @@ from .scrutin import Scrutin
 from .vote import Vote
 from .question import Question
 from .amendement import Amendement
+from .ia_cache import ResumeCache, SentimentCache
 
 __all__ = [
     "Depute",
@@ -18,4 +19,6 @@ __all__ = [
     "Vote",
     "Question",
     "Amendement",
+    "ResumeCache",
+    "SentimentCache",
 ]

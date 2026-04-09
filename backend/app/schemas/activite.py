@@ -3,7 +3,7 @@
 from datetime import date
 from typing import Optional, List
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class InterventionBrief(BaseModel):
@@ -11,6 +11,20 @@ class InterventionBrief(BaseModel):
     date: Optional[date] = None
     texte: Optional[str] = None
     type_seance: Optional[str] = None
+
+    @field_validator("date", mode="before")
+    @classmethod
+    def parse_date(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, date):
+            return v
+        if isinstance(v, str):
+            try:
+                return date.fromisoformat(v)
+            except ValueError:
+                return None
+        return None
 
     class Config:
         from_attributes = True
@@ -22,6 +36,20 @@ class VoteBrief(BaseModel):
     scrutin_titre: Optional[str] = None
     scrutin_date: Optional[date] = None
 
+    @field_validator("scrutin_date", mode="before")
+    @classmethod
+    def parse_date(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, date):
+            return v
+        if isinstance(v, str):
+            try:
+                return date.fromisoformat(v)
+            except ValueError:
+                return None
+        return None
+
     class Config:
         from_attributes = True
 
@@ -31,6 +59,20 @@ class AmendementBrief(BaseModel):
     date: Optional[date] = None
     sort: Optional[str] = None
     objet: Optional[str] = None
+
+    @field_validator("date", mode="before")
+    @classmethod
+    def parse_date(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, date):
+            return v
+        if isinstance(v, str):
+            try:
+                return date.fromisoformat(v)
+            except ValueError:
+                return None
+        return None
 
     class Config:
         from_attributes = True

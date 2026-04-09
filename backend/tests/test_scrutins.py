@@ -1,4 +1,4 @@
-"""Tests for scrutins endpoints."""
+# DemocratIA - Scrutins endpoint tests
 
 from app.models.scrutin import Scrutin
 from app.models.vote import Vote

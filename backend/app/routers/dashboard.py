@@ -1,4 +1,4 @@
-"""Dashboard aggregation endpoint with in-memory TTL cache."""
+# DemocratIA - Dashboard aggregation endpoint with cache
 
 import logging
 import time

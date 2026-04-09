@@ -1,4 +1,4 @@
-"""Sentiment analysis service using LLM API."""
+# DemocratIA - Sentiment analysis service
 
 import json
 

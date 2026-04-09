@@ -1,4 +1,4 @@
-"""Parliamentary synonym dictionary for enriched search queries."""
+# DemocratIA - Parliamentary synonym dictionary
 
 # Maps a search term to related terms used in parliamentary debate
 SYNONYMS: dict[str, list[str]] = {

@@ -1,4 +1,4 @@
-"""Pydantic schemas for groupes API."""
+# DemocratIA - Pydantic schemas for groupes
 
 from pydantic import BaseModel
 from .depute import DeputeResponse

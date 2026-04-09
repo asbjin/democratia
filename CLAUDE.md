@@ -99,17 +99,16 @@ db/init.sql, nginx/nginx.conf, nginx/ssl-setup.sh, scripts/git-as.sh, scripts/mo
 5. ✅ import_photos.py + comptes rendus dans download.py → Youva
 6. ✅ test_scrutins.py + test_groupes.py → Yassine
 
-## Sprint 6 📋
-1. docs/DEPLOYMENT.md → Yassine
-2. UI responsive + dark mode → Ceran
-3. Rate limiting + sécurité → Walid
-4. Script backup → Youva
-5. Endpoint /api/stats + démo → Anis
-6. Tag v1.0.0
+## Sprint 6 ✅ DONE — Tag v1.0.0
+1. ✅ docs/DEPLOYMENT.md + docs/ARCHITECTURE.md + README.md complet → Yassine
+2. ✅ Dark mode (prefers-color-scheme + toggle) + responsive + AboutPage → Ceran
+3. ✅ Rate limiting 100/min/IP + CORS restrictif + logging structure → Walid
+4. ✅ backup.sh + make backup + stats globales import_all.py → Youva
+5. ✅ GET /api/stats + demo_themes.json → Anis
+6. ✅ Headers DemocratIA sur tous les fichiers Python + nettoyage final → Yassine
 
 ## NOTES IMPORTANTES
-- Sprints 0-5 : TERMINÉS
-- Prochaine tâche : Sprint 6 tâche 1 (docs/DEPLOYMENT.md, Yassine)
+- Sprints 0-6 : TOUS TERMINÉS - Release v1.0.0
 - Le projet n'a PAS besoin de tourner réellement, juste du code propre sur GitHub
 - Pas besoin de clé API, pas besoin de Docker lancé
 - Le code doit être syntaxiquement correct et cohérent entre les fichiers

@@ -1,4 +1,4 @@
-"""Database engine and session configuration."""
+# DemocratIA - Database engine and session
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker

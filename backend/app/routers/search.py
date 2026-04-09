@@ -1,4 +1,4 @@
-"""Full-text search endpoint."""
+# DemocratIA - Full-text search endpoint
 
 import logging
 

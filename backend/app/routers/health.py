@@ -1,4 +1,4 @@
-"""Health check endpoint."""
+# DemocratIA - Health check endpoint
 
 from fastapi import APIRouter
 

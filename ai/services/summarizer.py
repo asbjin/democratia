@@ -1,4 +1,4 @@
-"""Summarization service using LLM API with parliamentary-specific prompts."""
+# DemocratIA - Parliamentary text summarizer
 
 import anthropic
 from tenacity import retry, stop_after_attempt, wait_exponential

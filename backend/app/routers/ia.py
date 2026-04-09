@@ -1,4 +1,4 @@
-"""IA endpoints for summaries and sentiment analysis with caching."""
+# DemocratIA - IA endpoints with caching
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel

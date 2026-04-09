@@ -1,4 +1,4 @@
-"""Download ZIP files from Assemblee Nationale Open Data."""
+# DemocratIA - Download datasets from Assemblee Nationale
 
 import logging
 import os

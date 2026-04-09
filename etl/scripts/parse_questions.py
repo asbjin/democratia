@@ -1,4 +1,4 @@
-"""Parse questions ecrites des deputes depuis les JSON de l'AN."""
+# DemocratIA - Parse questions from AN open data
 
 import json
 import logging

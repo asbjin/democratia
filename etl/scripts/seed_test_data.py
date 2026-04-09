@@ -1,4 +1,4 @@
-"""Seed the database with test fixture data for development."""
+# DemocratIA - Test data seeder
 
 import json
 import logging

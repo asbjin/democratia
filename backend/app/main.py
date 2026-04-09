@@ -1,4 +1,4 @@
-"""FastAPI application entry point."""
+# DemocratIA - FastAPI application entry point
 
 import logging
 

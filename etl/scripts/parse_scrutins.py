@@ -1,4 +1,4 @@
-"""Parse scrutins JSON files from Assemblee Nationale open data."""
+# DemocratIA - Parse scrutins JSON from AN open data
 
 import json
 import logging

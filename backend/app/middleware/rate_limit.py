@@ -1,4 +1,4 @@
-"""Rate limiting middleware - max 100 requests per minute per IP."""
+# DemocratIA - Rate limiting middleware
 
 import time
 from collections import defaultdict

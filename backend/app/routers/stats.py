@@ -1,4 +1,4 @@
-"""Global platform statistics endpoint."""
+# DemocratIA - Global platform statistics endpoint
 
 import logging
 from datetime import datetime

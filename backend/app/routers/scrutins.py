@@ -1,4 +1,4 @@
-"""Scrutins API endpoints."""
+# DemocratIA - Scrutins API endpoints
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func

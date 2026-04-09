@@ -1,4 +1,4 @@
-"""Download deputy photos from Assemblee Nationale website."""
+# DemocratIA - Deputy photo downloader
 
 import logging
 import os

@@ -1,4 +1,4 @@
-"""Import geographic data: circonscriptions and department mapping."""
+# DemocratIA - Geographic data import
 
 import logging
 import os

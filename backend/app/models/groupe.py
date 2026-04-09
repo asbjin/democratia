@@ -1,4 +1,4 @@
-"""Groupe politique model."""
+# DemocratIA - Groupe politique model
 
 from sqlalchemy import Column, String
 

@@ -41,7 +41,7 @@ graph LR
         SENT[Sentiment Analyzer]
         THEME[Theme Extractor]
         SYN[Synonymes<br/>parlementaires]
-        LLM[LLM API<br/>claude-sonnet-4]
+        LLM[LLM API<br/>Sonnet]
     end
 
     subgraph Frontend

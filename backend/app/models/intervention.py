@@ -1,4 +1,4 @@
-"""Intervention model with full-text search."""
+# DemocratIA - Intervention model with full-text search
 
 from sqlalchemy import Column, String, Integer, Date, Text, ForeignKey, Index
 from sqlalchemy.dialects.postgresql import TSVECTOR

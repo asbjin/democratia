@@ -1,4 +1,4 @@
-"""Groupes politiques API endpoints."""
+# DemocratIA - Groupes politiques API endpoints
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, extract

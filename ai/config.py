@@ -1,4 +1,4 @@
-"""AI module configuration."""
+# DemocratIA - AI module configuration
 
 import os
 

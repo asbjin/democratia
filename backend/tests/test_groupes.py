@@ -1,4 +1,4 @@
-"""Tests for groupes endpoints."""
+# DemocratIA - Groupes endpoint tests
 
 from app.models.groupe import Groupe
 from app.models.depute import Depute

@@ -1,4 +1,4 @@
-"""Deputes API endpoints."""
+# DemocratIA - Deputes API endpoints
 
 import logging
 

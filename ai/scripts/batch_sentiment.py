@@ -1,4 +1,4 @@
-"""Batch sentiment analysis for interventions without existing analysis."""
+# DemocratIA - Batch sentiment analysis script
 
 import logging
 import os

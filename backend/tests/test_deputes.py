@@ -1,4 +1,4 @@
-"""Tests for deputes endpoint."""
+# DemocratIA - Deputes endpoint tests
 
 
 def test_list_deputes_returns_200(client):

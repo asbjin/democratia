@@ -1,4 +1,4 @@
-"""Cache models for IA results."""
+# DemocratIA - Cache models for IA results
 
 from sqlalchemy import Column, String, Integer, Float, Text, DateTime
 from sqlalchemy.sql import func

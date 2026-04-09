@@ -31,7 +31,7 @@ Voir [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) pour le diagramme Mermaid comp
 - **Frontend** : React 18, Vite, Tailwind CSS, Recharts, React-Leaflet
 - **Base de donnees** : PostgreSQL 16 (pg_trgm, unaccent, vues materialisees)
 - **ETL** : Python 3.11, requests, zipfile, json, SQLAlchemy
-- **IA** : SDK Python anthropic, modele claude-sonnet-4-20250514
+- **IA** : SDK Python anthropic, LLM de derniere generation
 - **Infrastructure** : Docker Compose, Nginx, GitHub Actions CI
 - **Donnees** : Open Data Assemblee Nationale (https://data.assemblee-nationale.fr/)
 

@@ -1,4 +1,4 @@
-"""Theme extraction service using LLM API."""
+# DemocratIA - Theme extraction service
 
 import json
 

@@ -1,4 +1,4 @@
-"""Parse amendements des deputes depuis les JSON de l'AN."""
+# DemocratIA - Parse amendements from AN open data
 
 import json
 import logging

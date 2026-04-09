@@ -1,4 +1,4 @@
-"""Depute model."""
+# DemocratIA - Depute model
 
 from sqlalchemy import Column, String, Date, ForeignKey
 from sqlalchemy.orm import relationship

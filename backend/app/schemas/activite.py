@@ -1,4 +1,4 @@
-"""Pydantic schemas for depute activity API."""
+# DemocratIA - Pydantic schemas for depute activity
 
 from datetime import date
 from pydantic import BaseModel

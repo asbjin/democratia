@@ -1,4 +1,4 @@
-"""Parse acteurs JSON files from Assemblee Nationale open data."""
+# DemocratIA - Parse acteurs JSON from AN open data
 
 import json
 import logging

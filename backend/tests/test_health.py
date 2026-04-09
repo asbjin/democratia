@@ -1,4 +1,4 @@
-"""Tests for health endpoint."""
+# DemocratIA - Health endpoint tests
 
 
 def test_health_returns_200(client):

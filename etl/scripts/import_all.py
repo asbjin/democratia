@@ -1,4 +1,4 @@
-"""Orchestrator: download, parse, and import AN open data into PostgreSQL."""
+# DemocratIA - ETL pipeline orchestrator
 
 import logging
 import os

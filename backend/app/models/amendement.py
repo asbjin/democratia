@@ -1,4 +1,4 @@
-"""Amendement model."""
+# DemocratIA - Amendement model
 
 from sqlalchemy import Column, String, Date, Text, ForeignKey
 from sqlalchemy.orm import relationship

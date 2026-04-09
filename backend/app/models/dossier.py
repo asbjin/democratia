@@ -1,4 +1,4 @@
-"""Dossier legislatif model."""
+# DemocratIA - Dossier legislatif model
 
 from sqlalchemy import Column, String, Date, Integer
 

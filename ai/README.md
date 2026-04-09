@@ -50,7 +50,7 @@ python ai/scripts/batch_sentiment.py
 
 ## Modele utilise
 
-- **Modele** : claude-sonnet-4-20250514
+- **Modele** : LLM Sonnet (derniere version)
 - **Max tokens** : 300-500 selon le service
 - **Retry** : 3 tentatives avec backoff exponentiel
 

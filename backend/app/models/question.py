@@ -1,4 +1,4 @@
-"""Question au gouvernement model."""
+# DemocratIA - Question au gouvernement model
 
 from sqlalchemy import Column, String, Date, Text, ForeignKey
 from sqlalchemy.orm import relationship

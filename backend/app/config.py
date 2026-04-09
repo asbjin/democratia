@@ -1,4 +1,4 @@
-"""Application configuration using pydantic-settings."""
+# DemocratIA - Application configuration
 
 from pydantic_settings import BaseSettings
 

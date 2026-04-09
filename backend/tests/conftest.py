@@ -1,4 +1,4 @@
-"""Pytest fixtures for backend tests."""
+# DemocratIA - Pytest fixtures
 
 import pytest
 from fastapi.testclient import TestClient

@@ -26,10 +26,18 @@ function MapView({ onDepartmentClick, theme }) {
   const [activityData, setActivityData] = useState({});
 
   useEffect(() => {
-    fetch("/departements.geojson")
+    fetch(
+      "https://raw.githubusercontent.com/gregoiredavid/france-geojson/master/departements-version-simplifiee.geojson"
+    )
       .then((res) => res.json())
       .then(setGeoData)
-      .catch(() => {});
+      .catch(() => {
+        // Fallback to local file if CDN fails
+        fetch("/departements.geojson")
+          .then((res) => res.json())
+          .then(setGeoData)
+          .catch(() => {});
+      });
   }, []);
 
   useEffect(() => {
@@ -51,8 +59,8 @@ function MapView({ onDepartmentClick, theme }) {
   if (!geoData) return null;
 
   const style = (feature) => {
-    const code = feature.properties.code || feature.properties.nom;
-    const info = activityData[code] || {};
+    const nom = feature.properties.nom || feature.properties.code;
+    const info = activityData[nom] || {};
     const nb = info.nb_interventions || 0;
 
     return {
@@ -65,9 +73,8 @@ function MapView({ onDepartmentClick, theme }) {
   };
 
   const onEachFeature = (feature, layer) => {
-    const code = feature.properties.code || feature.properties.nom;
-    const nom = feature.properties.nom || code;
-    const info = activityData[code] || {};
+    const nom = feature.properties.nom || feature.properties.code;
+    const info = activityData[nom] || {};
 
     layer.bindTooltip(
       `<strong>${nom}</strong><br/>` +

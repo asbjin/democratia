@@ -1,6 +1,6 @@
 # DemocratIA - Pydantic schemas for groupes
 
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel
 from .depute import DeputeResponse
@@ -18,9 +18,9 @@ class GroupeStats(BaseModel):
 
 
 class GroupeDetail(GroupeStats):
-    deputes: list[DeputeResponse] = []
+    deputes: List[DeputeResponse] = []
 
 
 class GroupeList(BaseModel):
-    items: list[GroupeStats]
+    items: List[GroupeStats]
     total: int

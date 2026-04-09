@@ -1,6 +1,6 @@
 # DemocratIA - Scrutins API endpoints
 
-from typing import Optional
+from typing import Optional, Dict
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
@@ -54,7 +54,7 @@ def get_scrutin(scrutin_id: str, db: Session = Depends(get_db)):
     )
 
     # Aggregate by group
-    groupes_dict: dict[str, dict] = {}
+    groupes_dict: Dict[str, dict] = {}
     for row in votes_par_groupe:
         gid = row.groupe_politique_id or "Sans groupe"
         if gid not in groupes_dict:

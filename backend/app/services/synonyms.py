@@ -1,7 +1,9 @@
 # DemocratIA - Parliamentary synonym dictionary
 
+from typing import Dict, List
+
 # Maps a search term to related terms used in parliamentary debate
-SYNONYMS: dict[str, list[str]] = {
+SYNONYMS: Dict[str, List[str]] = {
     # Environment
     "climat": ["environnement", "ecologie", "transition energetique", "rechauffement", "carbone"],
     "environnement": ["climat", "ecologie", "biodiversite", "pollution", "developpement durable"],
@@ -53,7 +55,7 @@ SYNONYMS: dict[str, list[str]] = {
 }
 
 
-def expand_query(query: str) -> list[str]:
+def expand_query(query: str) -> List[str]:
     """Expand a search query with synonyms.
 
     Args:

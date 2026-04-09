@@ -1,7 +1,7 @@
 # DemocratIA - Pydantic schemas for deputes
 
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel
 
@@ -33,7 +33,7 @@ class DeputeResponse(BaseModel):
 
 
 class DeputeList(BaseModel):
-    items: list[DeputeResponse]
+    items: List[DeputeResponse]
     total: int
     page: int
     size: int

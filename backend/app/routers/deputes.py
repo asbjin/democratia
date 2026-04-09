@@ -1,6 +1,7 @@
 # DemocratIA - Deputes API endpoints
 
 import logging
+from typing import Optional, Dict, List
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
@@ -18,7 +19,7 @@ from ..schemas.depute import DeputeResponse, DeputeList
 from ..schemas.activite import ActiviteResponse, InterventionBrief, VoteBrief, AmendementBrief
 
 # Neighboring departments mapping (simplified for major departments)
-DEPT_NEIGHBORS: dict[str, list[str]] = {
+DEPT_NEIGHBORS: Dict[str, List[str]] = {
     "Paris": ["Hauts-de-Seine", "Seine-Saint-Denis", "Val-de-Marne"],
     "Hauts-de-Seine": ["Paris", "Yvelines", "Val-de-Marne", "Seine-Saint-Denis"],
     "Seine-Saint-Denis": ["Paris", "Hauts-de-Seine", "Val-de-Marne", "Val-d'Oise"],
@@ -38,8 +39,8 @@ router = APIRouter()
 def list_deputes(
     page: int = Query(1, ge=1),
     size: int = Query(50, ge=1, le=100),
-    groupe: str | None = None,
-    departement: str | None = None,
+    groupe: Optional[str] = None,
+    departement: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     logger.info(f"GET /deputes page={page} size={size} groupe={groupe} dept={departement}")
@@ -68,7 +69,7 @@ def get_depute(depute_id: str, db: Session = Depends(get_db)):
 @router.get("/deputes/{depute_id}/activite", response_model=ActiviteResponse)
 def get_depute_activite(
     depute_id: str,
-    theme: str | None = None,
+    theme: Optional[str] = None,
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -77,52 +78,75 @@ def get_depute_activite(
     if not depute:
         raise HTTPException(status_code=404, detail="Depute not found")
 
-    # Interventions with optional full-text search
-    intervention_query = db.query(Intervention).filter(Intervention.depute_id == depute_id)
-    if theme:
-        intervention_query = intervention_query.filter(
-            Intervention.search_vector.op("@@")(func.plainto_tsquery("french", theme))
+    try:
+        # Interventions with optional theme filter (ILIKE fallback if search_vector is empty)
+        intervention_query = db.query(Intervention).filter(Intervention.depute_id == depute_id)
+        if theme:
+            try:
+                intervention_query = intervention_query.filter(
+                    Intervention.search_vector.op("@@")(func.plainto_tsquery("french", theme))
+                )
+                # Test the query to see if search_vector works
+                intervention_query.count()
+            except Exception:
+                db.rollback()
+                intervention_query = db.query(Intervention).filter(
+                    Intervention.depute_id == depute_id,
+                    Intervention.texte.ilike(f"%{theme}%"),
+                )
+        total_interventions = intervention_query.count()
+        interventions = intervention_query.order_by(Intervention.date.desc()).offset((page - 1) * size).limit(size).all()
+
+        # Votes
+        vote_query = (
+            db.query(Vote, Scrutin)
+            .join(Scrutin, Scrutin.id == Vote.scrutin_id)
+            .filter(Vote.depute_id == depute_id)
         )
-    total_interventions = intervention_query.count()
-    interventions = intervention_query.order_by(Intervention.date.desc()).offset((page - 1) * size).limit(size).all()
+        if theme:
+            vote_query = vote_query.filter(Scrutin.titre.ilike(f"%{theme}%"))
+        total_votes = vote_query.count()
+        votes_raw = vote_query.order_by(Scrutin.date.desc()).offset((page - 1) * size).limit(size).all()
 
-    # Votes
-    vote_query = (
-        db.query(Vote, Scrutin)
-        .join(Scrutin, Scrutin.id == Vote.scrutin_id)
-        .filter(Vote.depute_id == depute_id)
-    )
-    if theme:
-        vote_query = vote_query.filter(Scrutin.titre.ilike(f"%{theme}%"))
-    total_votes = vote_query.count()
-    votes_raw = vote_query.order_by(Scrutin.date.desc()).offset((page - 1) * size).limit(size).all()
-
-    # Amendements
-    amendement_query = db.query(Amendement).filter(Amendement.depute_id == depute_id)
-    if theme:
-        amendement_query = amendement_query.filter(
-            Amendement.objet.ilike(f"%{theme}%") | Amendement.texte.ilike(f"%{theme}%")
-        )
-    total_amendements = amendement_query.count()
-    amendements = amendement_query.order_by(Amendement.date.desc()).offset((page - 1) * size).limit(size).all()
-
-    return ActiviteResponse(
-        depute_id=depute_id,
-        interventions=[InterventionBrief.model_validate(i) for i in interventions],
-        votes=[
-            VoteBrief(
-                scrutin_id=v.Vote.scrutin_id,
-                position=v.Vote.position,
-                scrutin_titre=v.Scrutin.titre,
-                scrutin_date=v.Scrutin.date,
+        # Amendements
+        amendement_query = db.query(Amendement).filter(Amendement.depute_id == depute_id)
+        if theme:
+            amendement_query = amendement_query.filter(
+                Amendement.objet.ilike(f"%{theme}%") | Amendement.texte.ilike(f"%{theme}%")
             )
-            for v in votes_raw
-        ],
-        amendements=[AmendementBrief.model_validate(a) for a in amendements],
-        total_interventions=total_interventions,
-        total_votes=total_votes,
-        total_amendements=total_amendements,
-    )
+        total_amendements = amendement_query.count()
+        amendements = amendement_query.order_by(Amendement.date.desc()).offset((page - 1) * size).limit(size).all()
+
+        return ActiviteResponse(
+            depute_id=depute_id,
+            interventions=[InterventionBrief.model_validate(i) for i in interventions],
+            votes=[
+                VoteBrief(
+                    scrutin_id=v.Vote.scrutin_id,
+                    position=v.Vote.position,
+                    scrutin_titre=v.Scrutin.titre,
+                    scrutin_date=v.Scrutin.date,
+                )
+                for v in votes_raw
+            ],
+            amendements=[AmendementBrief.model_validate(a) for a in amendements],
+            total_interventions=total_interventions,
+            total_votes=total_votes,
+            total_amendements=total_amendements,
+        )
+
+    except Exception as e:
+        db.rollback()
+        logger.error(f"GET /deputes/{depute_id}/activite failed: {e}")
+        return ActiviteResponse(
+            depute_id=depute_id,
+            interventions=[],
+            votes=[],
+            amendements=[],
+            total_interventions=0,
+            total_votes=0,
+            total_amendements=0,
+        )
 
 
 @router.get("/deputes/{depute_id}/votes")
@@ -167,7 +191,7 @@ def get_depute_votes(
 @router.get("/deputes/nearby")
 def get_nearby_deputes(
     dept: str = Query(..., min_length=1),
-    theme: str | None = None,
+    theme: Optional[str] = None,
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -180,11 +204,7 @@ def get_nearby_deputes(
     if theme:
         depute_ids_with_theme = (
             db.query(Intervention.depute_id)
-            .filter(
-                Intervention.search_vector.op("@@")(
-                    func.plainto_tsquery("french", theme)
-                )
-            )
+            .filter(Intervention.texte.ilike(f"%{theme}%"))
             .distinct()
             .subquery()
         )

@@ -1,5 +1,7 @@
 # DemocratIA - Groupes politiques API endpoints
 
+from typing import Optional, Dict
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func, extract
 from sqlalchemy.orm import Session
@@ -66,7 +68,7 @@ def get_groupe(groupe_id: str, db: Session = Depends(get_db)):
 @router.get("/groupes/{groupe_id}/dashboard")
 def get_groupe_dashboard(
     groupe_id: str,
-    theme: str | None = None,
+    theme: Optional[str] = None,
     db: Session = Depends(get_db),
 ):
     groupe = db.query(Groupe).filter(Groupe.id == groupe_id).first()
@@ -122,7 +124,7 @@ def get_groupe_dashboard(
 
     if scrutin_votes:
         # Group by scrutin_id, find majority position ratio
-        scrutin_data: dict[str, dict[str, int]] = {}
+        scrutin_data: Dict[str, Dict[str, int]] = {}
         for row in scrutin_votes:
             if row.scrutin_id not in scrutin_data:
                 scrutin_data[row.scrutin_id] = {}

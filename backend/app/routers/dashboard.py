@@ -2,7 +2,7 @@
 
 import logging
 import time
-from typing import Optional
+from typing import Optional, Dict, Tuple, Any
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, extract, text
@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 # In-memory cache with TTL (5 minutes)
-_cache: dict[str, tuple[float, dict]] = {}
+_cache: Dict[str, Tuple[float, Any]] = {}
 _CACHE_TTL = 300  # seconds
 
 

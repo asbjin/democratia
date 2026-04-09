@@ -1,7 +1,7 @@
 # DemocratIA - Pydantic schemas for depute activity
 
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel
 
@@ -38,9 +38,9 @@ class AmendementBrief(BaseModel):
 
 class ActiviteResponse(BaseModel):
     depute_id: str
-    interventions: list[InterventionBrief]
-    votes: list[VoteBrief]
-    amendements: list[AmendementBrief]
+    interventions: List[InterventionBrief]
+    votes: List[VoteBrief]
+    amendements: List[AmendementBrief]
     total_interventions: int
     total_votes: int
     total_amendements: int

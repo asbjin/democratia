@@ -1,7 +1,7 @@
 # DemocratIA - Pydantic schemas for scrutins
 
 from datetime import date
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel, field_validator
 
@@ -42,11 +42,11 @@ class ScrutinResponse(BaseModel):
 
 
 class ScrutinDetail(ScrutinResponse):
-    votes_par_groupe: list[VoteGroupe] = []
+    votes_par_groupe: List[VoteGroupe] = []
 
 
 class ScrutinList(BaseModel):
-    items: list[ScrutinResponse]
+    items: List[ScrutinResponse]
     total: int
     page: int
     size: int

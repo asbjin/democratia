@@ -17,6 +17,18 @@ function DashboardPage() {
   const [error, setError] = useState(null);
   const [departement, setDepartement] = useState("");
   const [scrutins, setScrutins] = useState([]);
+  const [groupes, setGroupes] = useState({});
+
+  useEffect(() => {
+    api
+      .get("/groupes")
+      .then((res) => {
+        const map = {};
+        (res.data.items || []).forEach((g) => { map[g.id] = g; });
+        setGroupes(map);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     setLoading(true);
@@ -149,7 +161,7 @@ function DashboardPage() {
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {data.top_deputes.map((d) => (
-              <DeputeCard key={d.id} depute={d} />
+              <DeputeCard key={d.id} depute={d} groupes={groupes} />
             ))}
           </div>
         </section>

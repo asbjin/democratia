@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
 
-function DeputeCard({ depute }) {
+function DeputeCard({ depute, groupes }) {
+  const groupe = groupes?.[depute.groupe_politique_id];
+  const groupeLabel = groupe?.sigle || groupe?.nom || depute.groupe_politique_id;
+
   return (
     <Link
       to={`/depute/${depute.id}`}
@@ -12,7 +15,7 @@ function DeputeCard({ depute }) {
         </h3>
         {depute.groupe_politique_id && (
           <span className="text-xs font-medium px-2 py-1 rounded-full bg-accent/10 text-accent">
-            {depute.groupe_politique_id}
+            {groupeLabel}
           </span>
         )}
       </div>

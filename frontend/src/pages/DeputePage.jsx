@@ -22,12 +22,21 @@ function DeputePage() {
   const [tabLoading, setTabLoading] = useState(false);
   const [resume, setResume] = useState(null);
   const [resumeLoading, setResumeLoading] = useState(false);
+  const [groupeNom, setGroupeNom] = useState(null);
 
   useEffect(() => {
     setLoading(true);
     api
       .get(`/deputes/${id}`)
-      .then((res) => setDepute(res.data))
+      .then((res) => {
+        setDepute(res.data);
+        if (res.data.groupe_politique_id) {
+          api
+            .get(`/groupes/${res.data.groupe_politique_id}`)
+            .then((gRes) => setGroupeNom(gRes.data.sigle || gRes.data.nom))
+            .catch(() => setGroupeNom(res.data.groupe_politique_id));
+        }
+      })
       .catch(() => setError("Depute non trouve"))
       .finally(() => setLoading(false));
   }, [id]);
@@ -133,7 +142,7 @@ function DeputePage() {
             </h1>
             {depute.groupe_politique_id && (
               <span className="inline-block mt-2 text-sm font-medium px-3 py-1 rounded-full bg-accent/10 text-accent">
-                {depute.groupe_politique_id}
+                {groupeNom || depute.groupe_politique_id}
               </span>
             )}
 

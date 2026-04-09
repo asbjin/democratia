@@ -17,16 +17,22 @@ const COLORS = [
 function ActivityChart({ data }) {
   if (!data || data.length === 0) return null;
 
+  // Use sigle if available, otherwise full group name
+  const chartData = data.map((d) => ({
+    ...d,
+    label: d.sigle || d.groupe || "Sans groupe",
+  }));
+
   return (
     <div className="bg-white rounded-lg shadow p-6">
       <h3 className="text-lg font-semibold text-primary mb-4">
         Activite par groupe politique
       </h3>
       <ResponsiveContainer width="100%" height={350}>
-        <BarChart data={data} layout="vertical" margin={{ left: 20 }}>
+        <BarChart data={chartData} layout="vertical" margin={{ left: 20 }}>
           <CartesianGrid strokeDasharray="3 3" />
           <XAxis type="number" />
-          <YAxis dataKey="groupe" type="category" width={120} tick={{ fontSize: 11 }} />
+          <YAxis dataKey="label" type="category" width={120} tick={{ fontSize: 11 }} />
           <Tooltip />
           <Bar dataKey="count" radius={[0, 4, 4, 0]}>
             {data.map((_, index) => (

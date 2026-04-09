@@ -6,23 +6,37 @@ import api from "../services/api";
 const FRANCE_CENTER = [46.603354, 1.888334];
 const FRANCE_ZOOM = 6;
 
-const COLOR_SCALE = [
-  { min: 0, max: 5, color: "#EBF5FB" },
-  { min: 5, max: 15, color: "#AED6F1" },
-  { min: 15, max: 30, color: "#5DADE2" },
-  { min: 30, max: 50, color: "#2E86C1" },
-  { min: 50, max: Infinity, color: "#1B4F72" },
-];
+// 6 color stops from light to dark blue
+const COLORS = ["#D4E6F1", "#85C1E9", "#5DADE2", "#2E86C1", "#1B6CA8", "#154360"];
+const NO_DATA_COLOR = "#F0F0F0";
 
 function stripAccents(str) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
-function getColor(value) {
-  for (const level of COLOR_SCALE) {
+function buildDynamicScale(activityData) {
+  const values = Object.values(activityData)
+    .map((d) => d.nb_interventions || 0)
+    .filter((v) => v > 0);
+
+  if (values.length === 0) return [];
+
+  const maxVal = Math.max(...values);
+  const step = Math.max(1, Math.ceil(maxVal / COLORS.length));
+
+  return COLORS.map((color, i) => ({
+    min: i * step,
+    max: i === COLORS.length - 1 ? Infinity : (i + 1) * step,
+    color,
+  }));
+}
+
+function getColor(value, scale) {
+  if (!value || value === 0) return NO_DATA_COLOR;
+  for (const level of scale) {
     if (value >= level.min && value < level.max) return level.color;
   }
-  return COLOR_SCALE[COLOR_SCALE.length - 1].color;
+  return COLORS[COLORS.length - 1];
 }
 
 function MapView({ onDepartmentClick, theme }) {
@@ -62,17 +76,19 @@ function MapView({ onDepartmentClick, theme }) {
 
   if (!geoData) return null;
 
+  const scale = buildDynamicScale(activityData);
+
   const style = (feature) => {
     const nom = stripAccents(feature.properties.nom || feature.properties.code || "");
     const info = activityData[nom] || {};
     const nb = info.nb_interventions || 0;
 
     return {
-      fillColor: getColor(nb),
+      fillColor: getColor(nb, scale),
       weight: 1,
       opacity: 1,
       color: "#fff",
-      fillOpacity: 0.75,
+      fillOpacity: 0.8,
     };
   };
 
@@ -125,15 +141,19 @@ function MapView({ onDepartmentClick, theme }) {
           />
         </MapContainer>
       </div>
-      <div className="flex items-center gap-2 mt-3 text-xs text-gray-500">
-        <span>Activite :</span>
-        {COLOR_SCALE.map((level, i) => (
+      <div className="flex items-center gap-2 mt-3 text-xs text-gray-500 flex-wrap">
+        <span>Interventions :</span>
+        <div className="flex items-center gap-1">
+          <div className="w-4 h-3 rounded-sm" style={{ backgroundColor: NO_DATA_COLOR }} />
+          <span>0</span>
+        </div>
+        {scale.map((level, i) => (
           <div key={i} className="flex items-center gap-1">
             <div
               className="w-4 h-3 rounded-sm"
               style={{ backgroundColor: level.color }}
             />
-            <span>{level.min}+</span>
+            <span>{level.min === 0 ? 1 : level.min}+</span>
           </div>
         ))}
       </div>

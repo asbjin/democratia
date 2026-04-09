@@ -1,6 +1,6 @@
 # DemocratIA - Pydantic schemas for depute activity
 
-from datetime import date
+import datetime
 from typing import Optional, List
 
 from pydantic import BaseModel, field_validator
@@ -8,7 +8,7 @@ from pydantic import BaseModel, field_validator
 
 class InterventionBrief(BaseModel):
     id: int
-    date: Optional[date] = None
+    date: Optional[datetime.date] = None
     texte: Optional[str] = None
     type_seance: Optional[str] = None
 
@@ -17,11 +17,11 @@ class InterventionBrief(BaseModel):
     def parse_date(cls, v):
         if v is None:
             return None
-        if isinstance(v, date):
+        if isinstance(v, datetime.date):
             return v
         if isinstance(v, str):
             try:
-                return date.fromisoformat(v)
+                return datetime.date.fromisoformat(v)
             except ValueError:
                 return None
         return None
@@ -34,18 +34,18 @@ class VoteBrief(BaseModel):
     scrutin_id: str
     position: str
     scrutin_titre: Optional[str] = None
-    scrutin_date: Optional[date] = None
+    scrutin_date: Optional[datetime.date] = None
 
     @field_validator("scrutin_date", mode="before")
     @classmethod
-    def parse_date(cls, v):
+    def parse_scrutin_date(cls, v):
         if v is None:
             return None
-        if isinstance(v, date):
+        if isinstance(v, datetime.date):
             return v
         if isinstance(v, str):
             try:
-                return date.fromisoformat(v)
+                return datetime.date.fromisoformat(v)
             except ValueError:
                 return None
         return None
@@ -56,7 +56,7 @@ class VoteBrief(BaseModel):
 
 class AmendementBrief(BaseModel):
     id: str
-    date: Optional[date] = None
+    date: Optional[datetime.date] = None
     sort: Optional[str] = None
     objet: Optional[str] = None
 
@@ -65,11 +65,11 @@ class AmendementBrief(BaseModel):
     def parse_date(cls, v):
         if v is None:
             return None
-        if isinstance(v, date):
+        if isinstance(v, datetime.date):
             return v
         if isinstance(v, str):
             try:
-                return date.fromisoformat(v)
+                return datetime.date.fromisoformat(v)
             except ValueError:
                 return None
         return None

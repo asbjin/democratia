@@ -7,6 +7,7 @@ import StatCard from "../components/StatCard";
 import ActivityChart from "../components/ActivityChart";
 import TimelineChart from "../components/TimelineChart";
 import VoteBreakdown from "../components/VoteBreakdown";
+import MapView from "../components/MapView";
 
 function DashboardPage() {
   const [searchParams] = useSearchParams();
@@ -126,9 +127,17 @@ function DashboardPage() {
         </div>
       )}
 
-      {/* Charts grid */}
+      {/* Map + Charts grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-10">
+        <MapView
+          onDepartmentClick={(dept) => setDepartement(dept)}
+          theme={query || undefined}
+        />
         {data?.par_groupe?.length > 0 && <ActivityChart data={data.par_groupe} />}
+      </div>
+
+      {/* Timeline */}
+      <div className="grid grid-cols-1 gap-6 mb-10">
         {data?.timeline?.length > 0 && <TimelineChart data={data.timeline} />}
       </div>
 

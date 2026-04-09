@@ -147,3 +147,54 @@ def get_dashboard(
 
     _set_cached(cache_key, result)
     return result
+
+
+@router.get("/dashboard/geo")
+def get_dashboard_geo(
+    theme: str | None = None,
+    db: Session = Depends(get_db),
+):
+    cache_key = f"geo:{theme or ''}"
+    cached = _get_cached(cache_key)
+    if cached:
+        return cached
+
+    query = (
+        db.query(
+            Depute.departement,
+            func.count(func.distinct(Depute.id)).label("nb_deputes_actifs"),
+            func.count(Intervention.id).label("nb_interventions"),
+        )
+        .join(Intervention, Intervention.depute_id == Depute.id)
+        .filter(Depute.departement.isnot(None))
+    )
+
+    if theme:
+        query = query.filter(
+            Intervention.search_vector.op("@@")(func.plainto_tsquery("french", theme))
+        )
+
+    query = query.group_by(Depute.departement)
+    results = query.all()
+
+    # Get top depute per department
+    geo_data = []
+    for r in results:
+        top = (
+            db.query(Depute.nom, Depute.prenom)
+            .join(Intervention, Intervention.depute_id == Depute.id)
+            .filter(Depute.departement == r.departement)
+            .group_by(Depute.id, Depute.nom, Depute.prenom)
+            .order_by(func.count(Intervention.id).desc())
+            .first()
+        )
+        geo_data.append({
+            "departement": r.departement,
+            "nom": r.departement,
+            "nb_deputes_actifs": r.nb_deputes_actifs,
+            "nb_interventions": r.nb_interventions,
+            "top_depute": f"{top.prenom} {top.nom}" if top else None,
+        })
+
+    _set_cached(cache_key, geo_data)
+    return geo_data

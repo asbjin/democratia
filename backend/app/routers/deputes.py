@@ -13,6 +13,20 @@ from ..models.scrutin import Scrutin
 from ..schemas.depute import DeputeResponse, DeputeList
 from ..schemas.activite import ActiviteResponse, InterventionBrief, VoteBrief, AmendementBrief
 
+# Neighboring departments mapping (simplified for major departments)
+DEPT_NEIGHBORS: dict[str, list[str]] = {
+    "Paris": ["Hauts-de-Seine", "Seine-Saint-Denis", "Val-de-Marne"],
+    "Hauts-de-Seine": ["Paris", "Yvelines", "Val-de-Marne", "Seine-Saint-Denis"],
+    "Seine-Saint-Denis": ["Paris", "Hauts-de-Seine", "Val-de-Marne", "Val-d'Oise"],
+    "Val-de-Marne": ["Paris", "Hauts-de-Seine", "Seine-Saint-Denis", "Essonne"],
+    "Yvelines": ["Hauts-de-Seine", "Essonne", "Val-d'Oise"],
+    "Essonne": ["Val-de-Marne", "Yvelines", "Seine-et-Marne"],
+    "Nord": ["Pas-de-Calais", "Aisne", "Somme"],
+    "Bouches-du-Rhone": ["Var", "Vaucluse", "Gard"],
+    "Rhone": ["Ain", "Isere", "Loire"],
+    "Gironde": ["Dordogne", "Lot-et-Garonne", "Landes", "Charente-Maritime"],
+}
+
 router = APIRouter()
 
 
@@ -140,5 +154,54 @@ def get_depute_votes(
                 "nb_abstention": r.Scrutin.nb_abstention,
             }
             for r in results
+        ],
+    }
+
+
+@router.get("/deputes/nearby")
+def get_nearby_deputes(
+    dept: str = Query(..., min_length=1),
+    theme: str | None = None,
+    page: int = Query(1, ge=1),
+    size: int = Query(20, ge=1, le=100),
+    db: Session = Depends(get_db),
+):
+    neighbors = DEPT_NEIGHBORS.get(dept, [])
+    all_depts = [dept] + neighbors
+
+    query = db.query(Depute).filter(Depute.departement.in_(all_depts))
+
+    if theme:
+        depute_ids_with_theme = (
+            db.query(Intervention.depute_id)
+            .filter(
+                Intervention.search_vector.op("@@")(
+                    func.plainto_tsquery("french", theme)
+                )
+            )
+            .distinct()
+            .subquery()
+        )
+        query = query.filter(Depute.id.in_(db.query(depute_ids_with_theme)))
+
+    total = query.count()
+    deputes = query.offset((page - 1) * size).limit(size).all()
+
+    return {
+        "departement": dept,
+        "departements_inclus": all_depts,
+        "total": total,
+        "page": page,
+        "size": size,
+        "items": [
+            {
+                "id": d.id,
+                "nom": d.nom,
+                "prenom": d.prenom,
+                "departement": d.departement,
+                "groupe_politique_id": d.groupe_politique_id,
+                "circonscription": d.circonscription,
+            }
+            for d in deputes
         ],
     }

@@ -1,14 +1,16 @@
 # DemocratIA - Pydantic schemas for deputes
 
 from datetime import date
+from typing import Optional
+
 from pydantic import BaseModel
 
 
 class GroupeResponse(BaseModel):
     id: str
     nom: str
-    sigle: str | None = None
-    couleur: str | None = None
+    sigle: Optional[str] = None
+    couleur: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -18,13 +20,13 @@ class DeputeResponse(BaseModel):
     id: str
     nom: str
     prenom: str
-    date_naissance: date | None = None
-    sexe: str | None = None
-    profession: str | None = None
-    groupe_politique_id: str | None = None
-    circonscription: str | None = None
-    departement: str | None = None
-    photo_url: str | None = None
+    date_naissance: Optional[date] = None
+    sexe: Optional[str] = None
+    profession: Optional[str] = None
+    groupe_politique_id: Optional[str] = None
+    circonscription: Optional[str] = None
+    departement: Optional[str] = None
+    photo_url: Optional[str] = None
 
     class Config:
         from_attributes = True

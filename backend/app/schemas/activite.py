@@ -1,14 +1,16 @@
 # DemocratIA - Pydantic schemas for depute activity
 
 from datetime import date
+from typing import Optional
+
 from pydantic import BaseModel
 
 
 class InterventionBrief(BaseModel):
     id: int
-    date: date | None = None
-    texte: str | None = None
-    type_seance: str | None = None
+    date: Optional[date] = None
+    texte: Optional[str] = None
+    type_seance: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -17,8 +19,8 @@ class InterventionBrief(BaseModel):
 class VoteBrief(BaseModel):
     scrutin_id: str
     position: str
-    scrutin_titre: str | None = None
-    scrutin_date: date | None = None
+    scrutin_titre: Optional[str] = None
+    scrutin_date: Optional[date] = None
 
     class Config:
         from_attributes = True
@@ -26,9 +28,9 @@ class VoteBrief(BaseModel):
 
 class AmendementBrief(BaseModel):
     id: str
-    date: date | None = None
-    sort: str | None = None
-    objet: str | None = None
+    date: Optional[date] = None
+    sort: Optional[str] = None
+    objet: Optional[str] = None
 
     class Config:
         from_attributes = True

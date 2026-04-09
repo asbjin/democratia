@@ -1,12 +1,14 @@
 # DemocratIA - Pydantic schemas for scrutins
 
 from datetime import date
+from typing import Optional
+
 from pydantic import BaseModel
 
 
 class VoteGroupe(BaseModel):
-    groupe_id: str | None = None
-    groupe_nom: str | None = None
+    groupe_id: Optional[str] = None
+    groupe_nom: Optional[str] = None
     pour: int = 0
     contre: int = 0
     abstention: int = 0
@@ -14,12 +16,12 @@ class VoteGroupe(BaseModel):
 
 class ScrutinResponse(BaseModel):
     id: str
-    date: date | None = None
-    titre: str | None = None
+    date: Optional[date] = None
+    titre: Optional[str] = None
     nb_pour: int = 0
     nb_contre: int = 0
     nb_abstention: int = 0
-    dossier_id: str | None = None
+    dossier_id: Optional[str] = None
 
     class Config:
         from_attributes = True

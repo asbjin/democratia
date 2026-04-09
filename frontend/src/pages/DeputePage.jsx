@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../services/api";
+import AISummary from "../components/AISummary";
+import SentimentBadge from "../components/SentimentBadge";
 
 const TABS = [
   { key: "activite", label: "Activite" },
@@ -229,14 +231,28 @@ function DeputePage() {
                           key={idx}
                           className="border-l-4 border-blue-400 pl-4 py-2"
                         >
-                          <p className="text-xs text-gray-400 mb-1">
-                            {intervention.date} &mdash;{" "}
-                            {intervention.type_seance || "Seance"}
-                          </p>
+                          <div className="flex items-center gap-2 mb-1">
+                            <p className="text-xs text-gray-400">
+                              {intervention.date} &mdash;{" "}
+                              {intervention.type_seance || "Seance"}
+                            </p>
+                            {intervention.sentiment_label && (
+                              <SentimentBadge
+                                label={intervention.sentiment_label}
+                                score={intervention.sentiment_score}
+                              />
+                            )}
+                          </div>
                           <p className="text-sm text-gray-700 line-clamp-3">
                             {intervention.texte?.slice(0, 300)}
                             {intervention.texte?.length > 300 ? "..." : ""}
                           </p>
+                          {intervention.texte?.length > 200 && (
+                            <AISummary
+                              text={intervention.texte}
+                              context={`Intervention de ${depute.prenom} ${depute.nom}`}
+                            />
+                          )}
                         </li>
                       ))}
                     </ul>

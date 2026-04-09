@@ -21,6 +21,12 @@ function Navbar() {
             >
               Dashboard
             </Link>
+            <Link
+              to="/groupes"
+              className="hover:text-blue-200 transition-colors font-medium"
+            >
+              Groupes
+            </Link>
             <a
               href="#about"
               className="hover:text-blue-200 transition-colors font-medium"

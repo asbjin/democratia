@@ -22,6 +22,10 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# Rate limiting: 100 requests per minute per IP (added first = runs inner)
+app.add_middleware(RateLimitMiddleware)
+
+# CORS: added last = runs outermost, so headers are set even on 500 errors
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -29,9 +33,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Rate limiting: 100 requests per minute per IP
-app.add_middleware(RateLimitMiddleware)
 
 app.include_router(health.router, prefix="/api", tags=["health"])
 app.include_router(deputes.router, prefix="/api", tags=["deputes"])
@@ -48,5 +49,5 @@ def on_startup():
     logger.info("Starting DemocratIA API...")
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables ready")
-    logger.info(f"CORS origins: {ALLOWED_ORIGINS}")
+    logger.info("CORS origins: allow all")
     logger.info("DemocratIA API started successfully")

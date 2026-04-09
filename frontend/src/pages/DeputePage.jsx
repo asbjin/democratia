@@ -41,27 +41,43 @@ function DeputePage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  // Eagerly load activite and votes on mount for indicators
+  useEffect(() => {
+    if (!depute) return;
+
+    api
+      .get(`/deputes/${id}/activite`)
+      .then((res) => setActivite(res.data))
+      .catch(() =>
+        setActivite({
+          depute_id: id,
+          interventions: [],
+          votes: [],
+          amendements: [],
+          total_interventions: 0,
+          total_votes: 0,
+          total_amendements: 0,
+        })
+      );
+
+    api
+      .get(`/deputes/${id}/votes`)
+      .then((res) => setVotes(res.data))
+      .catch(() => setVotes({ total: 0, items: [] }));
+  }, [id, depute]);
+
+  // Handle tab-specific loading states
   useEffect(() => {
     if (!depute) return;
 
     if (activeTab === "activite" && !activite) {
       setTabLoading(true);
-      api
-        .get(`/deputes/${id}/activite`)
-        .then((res) => setActivite(res.data))
-        .catch(() => {})
-        .finally(() => setTabLoading(false));
-    }
-
-    if (activeTab === "votes" && !votes) {
+    } else if (activeTab === "votes" && !votes) {
       setTabLoading(true);
-      api
-        .get(`/deputes/${id}/votes`)
-        .then((res) => setVotes(res.data))
-        .catch(() => {})
-        .finally(() => setTabLoading(false));
+    } else {
+      setTabLoading(false);
     }
-  }, [id, depute, activeTab, activite, votes]);
+  }, [activeTab, activite, votes, depute]);
 
   const handleResume = () => {
     if (resume || resumeLoading) return;
@@ -148,28 +164,24 @@ function DeputePage() {
 
             {/* Indicators */}
             <div className="flex gap-6 mt-4">
-              {activite && (
-                <>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-blue-600">
-                      {activite.total_interventions ?? 0}
-                    </p>
-                    <p className="text-xs text-gray-500">Interventions</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-green-600">
-                      {activite.total_votes ?? 0}
-                    </p>
-                    <p className="text-xs text-gray-500">Votes</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-purple-600">
-                      {activite.total_amendements ?? 0}
-                    </p>
-                    <p className="text-xs text-gray-500">Amendements</p>
-                  </div>
-                </>
-              )}
+              <div className="text-center">
+                <p className="text-2xl font-bold text-blue-600">
+                  {activite?.total_interventions ?? activite?.interventions?.length ?? 0}
+                </p>
+                <p className="text-xs text-gray-500">Interventions</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-green-600">
+                  {votes?.total ?? activite?.total_votes ?? 0}
+                </p>
+                <p className="text-xs text-gray-500">Votes</p>
+              </div>
+              <div className="text-center">
+                <p className="text-2xl font-bold text-purple-600">
+                  {activite?.total_amendements ?? activite?.amendements?.length ?? 0}
+                </p>
+                <p className="text-xs text-gray-500">Amendements</p>
+              </div>
             </div>
           </div>
         </div>

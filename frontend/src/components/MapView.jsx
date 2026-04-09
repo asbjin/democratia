@@ -14,6 +14,10 @@ const COLOR_SCALE = [
   { min: 50, max: Infinity, color: "#1B4F72" },
 ];
 
+function stripAccents(str) {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
 function getColor(value) {
   for (const level of COLOR_SCALE) {
     if (value >= level.min && value < level.max) return level.color;
@@ -59,7 +63,7 @@ function MapView({ onDepartmentClick, theme }) {
   if (!geoData) return null;
 
   const style = (feature) => {
-    const nom = feature.properties.nom || feature.properties.code;
+    const nom = stripAccents(feature.properties.nom || feature.properties.code || "");
     const info = activityData[nom] || {};
     const nb = info.nb_interventions || 0;
 
@@ -73,11 +77,12 @@ function MapView({ onDepartmentClick, theme }) {
   };
 
   const onEachFeature = (feature, layer) => {
-    const nom = feature.properties.nom || feature.properties.code;
+    const nomDisplay = feature.properties.nom || feature.properties.code || "";
+    const nom = stripAccents(nomDisplay);
     const info = activityData[nom] || {};
 
     layer.bindTooltip(
-      `<strong>${nom}</strong><br/>` +
+      `<strong>${nomDisplay}</strong><br/>` +
         `${info.nb_deputes_actifs || 0} deputes actifs<br/>` +
         `${info.nb_interventions || 0} interventions`,
       { sticky: true }
@@ -91,7 +96,7 @@ function MapView({ onDepartmentClick, theme }) {
         e.target.setStyle({ weight: 1, color: "#fff", fillOpacity: 0.75 });
       },
       click: () => {
-        if (onDepartmentClick) onDepartmentClick(nom);
+        if (onDepartmentClick) onDepartmentClick(nom); // Send unaccented name to match backend
       },
     });
   };

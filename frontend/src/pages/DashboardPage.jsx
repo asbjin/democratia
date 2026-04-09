@@ -85,7 +85,7 @@ function DashboardPage() {
       </div>
 
       {/* Department filter */}
-      <div className="mb-6 flex items-center gap-4">
+      <div className="mb-6 flex items-center gap-4 flex-wrap">
         <label htmlFor="dept-filter" className="text-sm font-medium text-gray-700">
           Filtrer par departement :
         </label>
@@ -107,6 +107,15 @@ function DashboardPage() {
           <option value="Yvelines">Yvelines</option>
           <option value="Essonne">Essonne</option>
         </select>
+        {departement && (
+          <button
+            onClick={() => setDepartement("")}
+            className="flex items-center gap-1 px-3 py-1.5 bg-accent text-white text-sm rounded-full hover:bg-primary transition-colors"
+          >
+            {departement}
+            <span className="ml-1 font-bold">&times;</span>
+          </button>
+        )}
       </div>
 
       {query && (

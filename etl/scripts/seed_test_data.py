@@ -62,7 +62,7 @@ class Scrutin(Base):
     id = Column(String, primary_key=True)
     dossier_id = Column(String, nullable=True)
     titre = Column(Text)
-    date = Column(String)
+    date = Column(Date)
     nb_pour = Column(Integer, default=0)
     nb_contre = Column(Integer, default=0)
     nb_abstention = Column(Integer, default=0)
@@ -81,7 +81,7 @@ class Intervention(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     depute_id = Column(String, ForeignKey("deputes.id"), nullable=False)
     dossier_id = Column(String, nullable=True)
-    date = Column(String)
+    date = Column(Date)
     texte = Column(Text)
     type_seance = Column(String)
 
@@ -111,7 +111,7 @@ def generate_interventions(data: dict, depute_ids: list[str]) -> list[dict]:
         interventions.append({
             "depute_id": random.choice(depute_ids),
             "dossier_id": random.choice(dossier_ids),
-            "date": intervention_date.isoformat(),
+            "date": intervention_date,
             "texte": texte,
             "type_seance": random.choice(types_seance),
         })
@@ -169,7 +169,10 @@ def seed(session):
     # Scrutins
     for s in data["scrutins"]:
         if not session.get(Scrutin, s["id"]):
-            session.add(Scrutin(**s))
+            s_copy = dict(s)
+            if s_copy.get("date"):
+                s_copy["date"] = date.fromisoformat(s_copy["date"])
+            session.add(Scrutin(**s_copy))
     session.commit()
     logger.info(f"Seeded {len(data['scrutins'])} scrutins")
 

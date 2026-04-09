@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
 import api from "../services/api";
 
-const FRANCE_CENTER = [46.6, 2.3];
+const FRANCE_CENTER = [46.603354, 1.888334];
 const FRANCE_ZOOM = 6;
 
 const COLOR_SCALE = [
@@ -93,11 +94,11 @@ function MapView({ onDepartmentClick, theme }) {
       <h3 className="text-lg font-semibold text-primary mb-3">
         Carte de l'activite parlementaire
       </h3>
-      <div className="rounded-lg overflow-hidden" style={{ height: "400px" }}>
+      <div className="rounded-lg overflow-hidden">
         <MapContainer
           center={FRANCE_CENTER}
           zoom={FRANCE_ZOOM}
-          style={{ height: "100%", width: "100%" }}
+          style={{ height: "500px", width: "100%" }}
           scrollWheelZoom={false}
         >
           <TileLayer

@@ -1,40 +1,205 @@
 {
   "type": "FeatureCollection",
   "features": [
-    {"type": "Feature", "properties": {"code": "Paris", "nom": "Paris"}, "geometry": {"type": "Polygon", "coordinates": [[[2.25, 48.82], [2.42, 48.82], [2.42, 48.90], [2.25, 48.90], [2.25, 48.82]]]}},
-    {"type": "Feature", "properties": {"code": "Hauts-de-Seine", "nom": "Hauts-de-Seine"}, "geometry": {"type": "Polygon", "coordinates": [[[2.15, 48.78], [2.25, 48.78], [2.25, 48.90], [2.15, 48.90], [2.15, 48.78]]]}},
-    {"type": "Feature", "properties": {"code": "Seine-Saint-Denis", "nom": "Seine-Saint-Denis"}, "geometry": {"type": "Polygon", "coordinates": [[[2.35, 48.87], [2.50, 48.87], [2.50, 48.97], [2.35, 48.97], [2.35, 48.87]]]}},
-    {"type": "Feature", "properties": {"code": "Val-de-Marne", "nom": "Val-de-Marne"}, "geometry": {"type": "Polygon", "coordinates": [[[2.30, 48.72], [2.52, 48.72], [2.52, 48.82], [2.30, 48.82], [2.30, 48.72]]]}},
-    {"type": "Feature", "properties": {"code": "Yvelines", "nom": "Yvelines"}, "geometry": {"type": "Polygon", "coordinates": [[[1.45, 48.70], [2.15, 48.70], [2.15, 49.00], [1.45, 49.00], [1.45, 48.70]]]}},
-    {"type": "Feature", "properties": {"code": "Essonne", "nom": "Essonne"}, "geometry": {"type": "Polygon", "coordinates": [[[2.00, 48.35], [2.55, 48.35], [2.55, 48.72], [2.00, 48.72], [2.00, 48.35]]]}},
-    {"type": "Feature", "properties": {"code": "Val-d'Oise", "nom": "Val-d'Oise"}, "geometry": {"type": "Polygon", "coordinates": [[[1.95, 48.95], [2.55, 48.95], [2.55, 49.18], [1.95, 49.18], [1.95, 48.95]]]}},
-    {"type": "Feature", "properties": {"code": "Seine-et-Marne", "nom": "Seine-et-Marne"}, "geometry": {"type": "Polygon", "coordinates": [[[2.40, 48.12], [3.55, 48.12], [3.55, 49.12], [2.40, 49.12], [2.40, 48.12]]]}},
-    {"type": "Feature", "properties": {"code": "Nord", "nom": "Nord"}, "geometry": {"type": "Polygon", "coordinates": [[[2.08, 50.05], [4.25, 50.05], [4.25, 51.10], [2.08, 51.10], [2.08, 50.05]]]}},
-    {"type": "Feature", "properties": {"code": "Pas-de-Calais", "nom": "Pas-de-Calais"}, "geometry": {"type": "Polygon", "coordinates": [[[1.55, 50.20], [2.95, 50.20], [2.95, 50.95], [1.55, 50.95], [1.55, 50.20]]]}},
-    {"type": "Feature", "properties": {"code": "Bouches-du-Rhone", "nom": "Bouches-du-Rhone"}, "geometry": {"type": "Polygon", "coordinates": [[[4.22, 43.15], [5.82, 43.15], [5.82, 43.92], [4.22, 43.92], [4.22, 43.15]]]}},
-    {"type": "Feature", "properties": {"code": "Var", "nom": "Var"}, "geometry": {"type": "Polygon", "coordinates": [[[5.66, 43.05], [6.93, 43.05], [6.93, 43.75], [5.66, 43.75], [5.66, 43.05]]]}},
-    {"type": "Feature", "properties": {"code": "Vaucluse", "nom": "Vaucluse"}, "geometry": {"type": "Polygon", "coordinates": [[[4.65, 43.72], [5.75, 43.72], [5.75, 44.42], [4.65, 44.42], [4.65, 43.72]]]}},
-    {"type": "Feature", "properties": {"code": "Rhone", "nom": "Rhone"}, "geometry": {"type": "Polygon", "coordinates": [[[4.24, 45.45], [5.16, 45.45], [5.16, 46.00], [4.24, 46.00], [4.24, 45.45]]]}},
-    {"type": "Feature", "properties": {"code": "Isere", "nom": "Isere"}, "geometry": {"type": "Polygon", "coordinates": [[[5.08, 44.68], [6.36, 44.68], [6.36, 45.58], [5.08, 45.58], [5.08, 44.68]]]}},
-    {"type": "Feature", "properties": {"code": "Loire", "nom": "Loire"}, "geometry": {"type": "Polygon", "coordinates": [[[3.68, 45.23], [4.50, 45.23], [4.50, 46.27], [3.68, 46.27], [3.68, 45.23]]]}},
-    {"type": "Feature", "properties": {"code": "Ain", "nom": "Ain"}, "geometry": {"type": "Polygon", "coordinates": [[[4.72, 45.62], [6.17, 45.62], [6.17, 46.52], [4.72, 46.52], [4.72, 45.62]]]}},
-    {"type": "Feature", "properties": {"code": "Gironde", "nom": "Gironde"}, "geometry": {"type": "Polygon", "coordinates": [[[-1.26, 44.19], [0.32, 44.19], [0.32, 45.57], [-1.26, 45.57], [-1.26, 44.19]]]}},
-    {"type": "Feature", "properties": {"code": "Dordogne", "nom": "Dordogne"}, "geometry": {"type": "Polygon", "coordinates": [[[0.04, 44.57], [1.45, 44.57], [1.45, 45.72], [0.04, 45.72], [0.04, 44.57]]]}},
-    {"type": "Feature", "properties": {"code": "Landes", "nom": "Landes"}, "geometry": {"type": "Polygon", "coordinates": [[[-1.52, 43.48], [-0.03, 43.48], [-0.03, 44.53], [-1.52, 44.53], [-1.52, 43.48]]]}},
-    {"type": "Feature", "properties": {"code": "Haute-Garonne", "nom": "Haute-Garonne"}, "geometry": {"type": "Polygon", "coordinates": [[[0.44, 42.89], [2.05, 42.89], [2.05, 43.92], [0.44, 43.92], [0.44, 42.89]]]}},
-    {"type": "Feature", "properties": {"code": "Herault", "nom": "Herault"}, "geometry": {"type": "Polygon", "coordinates": [[[2.53, 43.21], [4.19, 43.21], [4.19, 43.97], [2.53, 43.97], [2.53, 43.21]]]}},
-    {"type": "Feature", "properties": {"code": "Gard", "nom": "Gard"}, "geometry": {"type": "Polygon", "coordinates": [[[3.26, 43.46], [4.85, 43.46], [4.85, 44.46], [3.26, 44.46], [3.26, 43.46]]]}},
-    {"type": "Feature", "properties": {"code": "Loire-Atlantique", "nom": "Loire-Atlantique"}, "geometry": {"type": "Polygon", "coordinates": [[[-2.56, 46.86], [-0.92, 46.86], [-0.92, 47.58], [-2.56, 47.58], [-2.56, 46.86]]]}},
-    {"type": "Feature", "properties": {"code": "Finistere", "nom": "Finistere"}, "geometry": {"type": "Polygon", "coordinates": [[[-4.79, 47.72], [-3.39, 47.72], [-3.39, 48.75], [-4.79, 48.75], [-4.79, 47.72]]]}},
-    {"type": "Feature", "properties": {"code": "Ille-et-Vilaine", "nom": "Ille-et-Vilaine"}, "geometry": {"type": "Polygon", "coordinates": [[[-2.29, 47.63], [-1.01, 47.63], [-1.01, 48.57], [-2.29, 48.57], [-2.29, 47.63]]]}},
-    {"type": "Feature", "properties": {"code": "Bas-Rhin", "nom": "Bas-Rhin"}, "geometry": {"type": "Polygon", "coordinates": [[[6.94, 48.12], [8.23, 48.12], [8.23, 49.08], [6.94, 49.08], [6.94, 48.12]]]}},
-    {"type": "Feature", "properties": {"code": "Haut-Rhin", "nom": "Haut-Rhin"}, "geometry": {"type": "Polygon", "coordinates": [[[6.84, 47.42], [7.62, 47.42], [7.62, 48.31], [6.84, 48.31], [6.84, 47.42]]]}},
-    {"type": "Feature", "properties": {"code": "Moselle", "nom": "Moselle"}, "geometry": {"type": "Polygon", "coordinates": [[[5.89, 48.53], [7.64, 48.53], [7.64, 49.52], [5.89, 49.52], [5.89, 48.53]]]}},
-    {"type": "Feature", "properties": {"code": "Marne", "nom": "Marne"}, "geometry": {"type": "Polygon", "coordinates": [[[3.39, 48.51], [4.86, 48.51], [4.86, 49.41], [3.39, 49.41], [3.39, 48.51]]]}},
-    {"type": "Feature", "properties": {"code": "Somme", "nom": "Somme"}, "geometry": {"type": "Polygon", "coordinates": [[[1.37, 49.57], [3.19, 49.57], [3.19, 50.37], [1.37, 50.37], [1.37, 49.57]]]}},
-    {"type": "Feature", "properties": {"code": "Aisne", "nom": "Aisne"}, "geometry": {"type": "Polygon", "coordinates": [[[2.95, 49.06], [4.26, 49.06], [4.26, 50.07], [2.95, 50.07], [2.95, 49.06]]]}},
-    {"type": "Feature", "properties": {"code": "Calvados", "nom": "Calvados"}, "geometry": {"type": "Polygon", "coordinates": [[[-0.85, 48.75], [0.44, 48.75], [0.44, 49.40], [-0.85, 49.40], [-0.85, 48.75]]]}},
-    {"type": "Feature", "properties": {"code": "Seine-Maritime", "nom": "Seine-Maritime"}, "geometry": {"type": "Polygon", "coordinates": [[[0.07, 49.25], [1.79, 49.25], [1.79, 49.93], [0.07, 49.93], [0.07, 49.25]]]}},
-    {"type": "Feature", "properties": {"code": "Puy-de-Dome", "nom": "Puy-de-Dome"}, "geometry": {"type": "Polygon", "coordinates": [[[2.39, 45.28], [3.59, 45.28], [3.59, 46.26], [2.39, 46.26], [2.39, 45.28]]]}}
+    {
+      "type": "Feature",
+      "properties": {"code": "Paris", "nom": "Paris"},
+      "geometry": {"type": "Polygon", "coordinates": [[[2.224, 48.816], [2.224, 48.902], [2.470, 48.902], [2.470, 48.816], [2.224, 48.816]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Hauts-de-Seine", "nom": "Hauts-de-Seine"},
+      "geometry": {"type": "Polygon", "coordinates": [[[2.145, 48.780], [2.145, 48.905], [2.240, 48.905], [2.240, 48.780], [2.145, 48.780]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Seine-Saint-Denis", "nom": "Seine-Saint-Denis"},
+      "geometry": {"type": "Polygon", "coordinates": [[[2.380, 48.880], [2.380, 48.975], [2.600, 48.975], [2.600, 48.880], [2.380, 48.880]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Val-de-Marne", "nom": "Val-de-Marne"},
+      "geometry": {"type": "Polygon", "coordinates": [[[2.305, 48.690], [2.305, 48.820], [2.610, 48.820], [2.610, 48.690], [2.305, 48.690]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Yvelines", "nom": "Yvelines"},
+      "geometry": {"type": "Polygon", "coordinates": [[[1.440, 48.440], [1.440, 49.080], [2.150, 49.080], [2.150, 48.440], [1.440, 48.440]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Essonne", "nom": "Essonne"},
+      "geometry": {"type": "Polygon", "coordinates": [[[1.920, 48.280], [1.920, 48.700], [2.590, 48.700], [2.590, 48.280], [1.920, 48.280]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Val-d'Oise", "nom": "Val-d'Oise"},
+      "geometry": {"type": "Polygon", "coordinates": [[[1.600, 48.950], [1.600, 49.190], [2.590, 49.190], [2.590, 48.950], [1.600, 48.950]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Seine-et-Marne", "nom": "Seine-et-Marne"},
+      "geometry": {"type": "Polygon", "coordinates": [[[2.390, 48.120], [2.390, 49.120], [3.560, 49.120], [3.560, 48.120], [2.390, 48.120]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Nord", "nom": "Nord"},
+      "geometry": {"type": "Polygon", "coordinates": [[[2.070, 50.050], [2.070, 51.090], [4.230, 51.090], [4.230, 50.050], [2.070, 50.050]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Pas-de-Calais", "nom": "Pas-de-Calais"},
+      "geometry": {"type": "Polygon", "coordinates": [[[1.550, 50.020], [1.550, 50.920], [3.190, 50.920], [3.190, 50.020], [1.550, 50.020]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Somme", "nom": "Somme"},
+      "geometry": {"type": "Polygon", "coordinates": [[[1.370, 49.570], [1.370, 50.070], [3.190, 50.070], [3.190, 49.570], [1.370, 49.570]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Aisne", "nom": "Aisne"},
+      "geometry": {"type": "Polygon", "coordinates": [[[2.950, 49.060], [2.950, 50.070], [4.260, 50.070], [4.260, 49.060], [2.950, 49.060]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Oise", "nom": "Oise"},
+      "geometry": {"type": "Polygon", "coordinates": [[[1.690, 49.060], [1.690, 49.760], [3.170, 49.760], [3.170, 49.060], [1.690, 49.060]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Bouches-du-Rhone", "nom": "Bouches-du-Rhone"},
+      "geometry": {"type": "Polygon", "coordinates": [[[4.230, 43.160], [4.230, 43.920], [5.810, 43.920], [5.810, 43.160], [4.230, 43.160]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Var", "nom": "Var"},
+      "geometry": {"type": "Polygon", "coordinates": [[[5.660, 43.020], [5.660, 43.770], [6.930, 43.770], [6.930, 43.020], [5.660, 43.020]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Vaucluse", "nom": "Vaucluse"},
+      "geometry": {"type": "Polygon", "coordinates": [[[4.640, 43.720], [4.640, 44.430], [5.760, 44.430], [5.760, 43.720], [4.640, 43.720]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Alpes-Maritimes", "nom": "Alpes-Maritimes"},
+      "geometry": {"type": "Polygon", "coordinates": [[[6.630, 43.480], [6.630, 44.360], [7.720, 44.360], [7.720, 43.480], [6.630, 43.480]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Gard", "nom": "Gard"},
+      "geometry": {"type": "Polygon", "coordinates": [[[3.260, 43.460], [3.260, 44.460], [4.850, 44.460], [4.850, 43.460], [3.260, 43.460]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Rhone", "nom": "Rhone"},
+      "geometry": {"type": "Polygon", "coordinates": [[[4.240, 45.450], [4.240, 46.000], [5.160, 46.000], [5.160, 45.450], [4.240, 45.450]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Isere", "nom": "Isere"},
+      "geometry": {"type": "Polygon", "coordinates": [[[5.080, 44.680], [5.080, 45.880], [6.360, 45.880], [6.360, 44.680], [5.080, 44.680]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Loire", "nom": "Loire"},
+      "geometry": {"type": "Polygon", "coordinates": [[[3.680, 45.230], [3.680, 46.270], [4.500, 46.270], [4.500, 45.230], [3.680, 45.230]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Ain", "nom": "Ain"},
+      "geometry": {"type": "Polygon", "coordinates": [[[4.720, 45.620], [4.720, 46.520], [6.170, 46.520], [6.170, 45.620], [4.720, 45.620]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Puy-de-Dome", "nom": "Puy-de-Dome"},
+      "geometry": {"type": "Polygon", "coordinates": [[[2.390, 45.280], [2.390, 46.260], [3.590, 46.260], [3.590, 45.280], [2.390, 45.280]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Haute-Savoie", "nom": "Haute-Savoie"},
+      "geometry": {"type": "Polygon", "coordinates": [[[5.820, 45.680], [5.820, 46.410], [6.800, 46.410], [6.800, 45.680], [5.820, 45.680]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Gironde", "nom": "Gironde"},
+      "geometry": {"type": "Polygon", "coordinates": [[[-1.260, 44.190], [-1.260, 45.570], [0.320, 45.570], [0.320, 44.190], [-1.260, 44.190]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Dordogne", "nom": "Dordogne"},
+      "geometry": {"type": "Polygon", "coordinates": [[[0.040, 44.570], [0.040, 45.720], [1.450, 45.720], [1.450, 44.570], [0.040, 44.570]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Landes", "nom": "Landes"},
+      "geometry": {"type": "Polygon", "coordinates": [[[-1.520, 43.480], [-1.520, 44.530], [-0.030, 44.530], [-0.030, 43.480], [-1.520, 43.480]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Lot-et-Garonne", "nom": "Lot-et-Garonne"},
+      "geometry": {"type": "Polygon", "coordinates": [[[0.030, 43.980], [0.030, 44.770], [1.080, 44.770], [1.080, 43.980], [0.030, 43.980]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Pyrenees-Atlantiques", "nom": "Pyrenees-Atlantiques"},
+      "geometry": {"type": "Polygon", "coordinates": [[[-1.790, 42.780], [-1.790, 43.590], [-0.310, 43.590], [-0.310, 42.780], [-1.790, 42.780]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Charente-Maritime", "nom": "Charente-Maritime"},
+      "geometry": {"type": "Polygon", "coordinates": [[[-1.220, 45.080], [-1.220, 46.370], [-0.060, 46.370], [-0.060, 45.080], [-1.220, 45.080]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Haute-Garonne", "nom": "Haute-Garonne"},
+      "geometry": {"type": "Polygon", "coordinates": [[[0.440, 42.890], [0.440, 43.920], [2.050, 43.920], [2.050, 42.890], [0.440, 42.890]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Herault", "nom": "Herault"},
+      "geometry": {"type": "Polygon", "coordinates": [[[2.530, 43.210], [2.530, 43.970], [4.190, 43.970], [4.190, 43.210], [2.530, 43.210]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Loire-Atlantique", "nom": "Loire-Atlantique"},
+      "geometry": {"type": "Polygon", "coordinates": [[[-2.560, 46.860], [-2.560, 47.580], [-0.920, 47.580], [-0.920, 46.860], [-2.560, 46.860]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Finistere", "nom": "Finistere"},
+      "geometry": {"type": "Polygon", "coordinates": [[[-4.790, 47.720], [-4.790, 48.750], [-3.390, 48.750], [-3.390, 47.720], [-4.790, 47.720]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Ille-et-Vilaine", "nom": "Ille-et-Vilaine"},
+      "geometry": {"type": "Polygon", "coordinates": [[[-2.290, 47.630], [-2.290, 48.570], [-1.010, 48.570], [-1.010, 47.630], [-2.290, 47.630]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Bas-Rhin", "nom": "Bas-Rhin"},
+      "geometry": {"type": "Polygon", "coordinates": [[[6.940, 48.120], [6.940, 49.080], [8.230, 49.080], [8.230, 48.120], [6.940, 48.120]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Moselle", "nom": "Moselle"},
+      "geometry": {"type": "Polygon", "coordinates": [[[5.890, 48.530], [5.890, 49.520], [7.640, 49.520], [7.640, 48.530], [5.890, 48.530]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Marne", "nom": "Marne"},
+      "geometry": {"type": "Polygon", "coordinates": [[[3.390, 48.510], [3.390, 49.410], [4.860, 49.410], [4.860, 48.510], [3.390, 48.510]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Seine-Maritime", "nom": "Seine-Maritime"},
+      "geometry": {"type": "Polygon", "coordinates": [[[0.070, 49.250], [0.070, 49.930], [1.790, 49.930], [1.790, 49.250], [0.070, 49.250]]]}
+    },
+    {
+      "type": "Feature",
+      "properties": {"code": "Calvados", "nom": "Calvados"},
+      "geometry": {"type": "Polygon", "coordinates": [[[-0.850, 48.750], [-0.850, 49.400], [0.440, 49.400], [0.440, 48.750], [-0.850, 48.750]]]}
+    }
   ]
 }

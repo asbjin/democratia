@@ -1,4 +1,4 @@
-"""Summarization service using LLM API."""
+"""Summarization service using LLM API with parliamentary-specific prompts."""
 
 import anthropic
 from tenacity import retry, stop_after_attempt, wait_exponential
@@ -17,26 +17,45 @@ class Summarizer:
         stop=stop_after_attempt(3),
         wait=wait_exponential(multiplier=1, min=2, max=10),
     )
-    async def summarize(self, text: str, context: str = "") -> str:
+    def summarize(self, text: str, context: str = "", dossier_titre: str = "", theme: str = "") -> str:
         """Summarize a parliamentary text in 3-5 sentences accessible to citizens.
 
         Args:
             text: The parliamentary text to summarize.
-            context: Optional context (e.g., dossier title, theme).
+            context: Optional context (e.g., deputy name, group).
+            dossier_titre: Title of the legislative dossier.
+            theme: Theme of the dossier or debate.
 
         Returns:
             A clear, accessible summary in French.
         """
         system_prompt = (
-            "Tu es un assistant specialise dans la vulgarisation de l'activite "
-            "parlementaire francaise. Ton role est de rendre les textes legislatifs "
-            "et les debats accessibles a tous les citoyens."
+            "Tu es un expert en vulgarisation parlementaire pour le projet DemocratIA. "
+            "Ton public est compose de citoyens francais qui ne sont pas specialistes "
+            "du droit ou de la politique. "
+            "Regles :\n"
+            "- Resume en 3 a 5 phrases claires, sans jargon juridique\n"
+            "- Explique les enjeux concrets pour les citoyens\n"
+            "- Mentionne les positions principales si le texte est un debat\n"
+            "- Utilise un ton neutre et factuel\n"
+            "- Ne prends pas position, reste objectif"
         )
 
-        user_prompt = "Resume le texte parlementaire suivant en 3 a 5 phrases claires et accessibles.\n\n"
+        user_prompt = ""
+        if dossier_titre:
+            user_prompt += f"Dossier legislatif : {dossier_titre}\n"
+        if theme:
+            user_prompt += f"Theme : {theme}\n"
         if context:
-            user_prompt += f"Contexte : {context}\n\n"
-        user_prompt += f"Texte :\n{text}"
+            user_prompt += f"Contexte : {context}\n"
+        if user_prompt:
+            user_prompt += "\n"
+
+        user_prompt += (
+            "Resume le texte parlementaire suivant de maniere accessible "
+            "pour un citoyen non-specialiste :\n\n"
+            f"{text}"
+        )
 
         message = self.client.messages.create(
             model=self.model,

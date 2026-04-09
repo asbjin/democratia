@@ -110,5 +110,5 @@
     "Concernant {theme}, je souhaite rappeler que la France s'est engagee au niveau europeen. Nous devons honorer nos engagements internationaux.",
     "La question de {theme} depasse les clivages politiques. Je lance un appel au rassemblement pour trouver une solution qui serve l'interet general."
   ],
-  "themes": ["le budget de l'Etat", "la reforme des retraites", "l'immigration", "la transition ecologique", "le numerique", "la sante publique", "l'education nationale", "la securite", "le logement", "l'emploi"]
+  "themes": ["le budget et les finances publiques", "la reforme des retraites et les pensions", "l'immigration et le droit d'asile", "le climat et la transition ecologique", "le numerique et la cybersecurite", "la sante publique et l'hopital", "l'education nationale et l'ecole", "la securite et la police", "le logement social et l'habitat", "l'emploi et le chomage"]
 }

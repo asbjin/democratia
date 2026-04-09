@@ -45,11 +45,9 @@ function MapView({ onDepartmentClick, theme }) {
   }, []);
 
   useEffect(() => {
-    const params = {};
-    if (theme) params.theme = theme;
-
+    // Always load all departments for the map overview (no theme filter)
     api
-      .get("/dashboard/geo", { params })
+      .get("/dashboard/geo")
       .then((res) => {
         const map = {};
         (res.data || []).forEach((d) => {
@@ -58,7 +56,7 @@ function MapView({ onDepartmentClick, theme }) {
         setActivityData(map);
       })
       .catch(() => {});
-  }, [theme]);
+  }, []);
 
   if (!geoData) return null;
 

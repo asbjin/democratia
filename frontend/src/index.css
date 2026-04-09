@@ -7,6 +7,19 @@
   --accent: #2e75b6;
   --bg: #f8fafc;
   --text: #1e293b;
+  --card-bg: #ffffff;
+  --border: #e2e8f0;
+  --muted: #64748b;
+}
+
+.dark {
+  --primary: #93c5fd;
+  --accent: #60a5fa;
+  --bg: #0f172a;
+  --text: #e2e8f0;
+  --card-bg: #1e293b;
+  --border: #334155;
+  --muted: #94a3b8;
 }
 
 body {
@@ -14,4 +27,70 @@ body {
   background-color: var(--bg);
   color: var(--text);
   margin: 0;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Card transitions */
+.bg-white {
+  background-color: var(--card-bg);
+  transition: background-color 0.3s ease, box-shadow 0.2s ease;
+}
+
+.dark .bg-white {
+  background-color: var(--card-bg);
+}
+
+.dark .bg-primary {
+  background-color: #1e293b;
+}
+
+.dark .text-primary {
+  color: var(--primary);
+}
+
+.dark .text-gray-500,
+.dark .text-gray-400,
+.dark .text-gray-600,
+.dark .text-gray-700 {
+  color: var(--muted);
+}
+
+.dark .border-gray-300 {
+  border-color: var(--border);
+}
+
+.dark .bg-gray-50 {
+  background-color: #1e293b;
+}
+
+.dark .shadow-md,
+.dark .shadow-lg {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+}
+
+/* Button and card hover transitions */
+button,
+a,
+.shadow-md,
+.shadow-lg {
+  transition: all 0.2s ease;
+}
+
+/* Responsive utilities */
+@media (max-width: 640px) {
+  .text-5xl {
+    font-size: 2rem;
+  }
+
+  .text-3xl {
+    font-size: 1.5rem;
+  }
+
+  .gap-6 {
+    gap: 1rem;
+  }
+
+  .p-8 {
+    padding: 1.25rem;
+  }
 }

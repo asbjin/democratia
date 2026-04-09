@@ -4,6 +4,7 @@ import HomePage from "./pages/HomePage";
 import DashboardPage from "./pages/DashboardPage";
 import DeputePage from "./pages/DeputePage";
 import GroupesPage from "./pages/GroupesPage";
+import AboutPage from "./pages/AboutPage";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardPage />} />
           <Route path="/depute/:id" element={<DeputePage />} />
           <Route path="/groupes" element={<GroupesPage />} />
+          <Route path="/about" element={<AboutPage />} />
         </Routes>
       </Layout>
     </BrowserRouter>

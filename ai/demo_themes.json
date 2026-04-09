@@ -1,0 +1,35 @@
+{
+  "description": "Themes de demonstration prepares pour la soutenance DemocratIA",
+  "themes": [
+    {
+      "id": "climat",
+      "label": "Climat et transition ecologique",
+      "keywords": ["climat", "environnement", "ecologie", "carbone", "rechauffement", "transition energetique", "biodiversite", "renouvelable", "pollution"],
+      "query_suggestion": "transition ecologique",
+      "expected_results": "Interventions sur les objectifs carbone 2030, passoires thermiques, energies renouvelables",
+      "dossiers_lies": ["DLR5L17N004"]
+    },
+    {
+      "id": "logement_social",
+      "label": "Logement social et habitat",
+      "keywords": ["logement", "HLM", "habitat", "hebergement", "locataire", "proprietaire", "renovation", "loyer", "APL", "construction"],
+      "query_suggestion": "logement social",
+      "expected_results": "Debats sur la loi SRU, renovation energetique, encadrement des loyers",
+      "dossiers_lies": []
+    },
+    {
+      "id": "securite_routiere",
+      "label": "Securite routiere",
+      "keywords": ["securite routiere", "accident", "vitesse", "permis", "conducteur", "alcool", "route", "mortalite routiere", "radar"],
+      "query_suggestion": "securite routiere",
+      "expected_results": "Questions au gouvernement sur les radars, le permis a points, la mortalite routiere",
+      "dossiers_lies": []
+    }
+  ],
+  "usage": {
+    "recherche": "Utiliser le champ de recherche avec query_suggestion pour trouver les interventions pertinentes",
+    "resume_ia": "Selectionner une intervention longue et cliquer sur Generer le resume",
+    "sentiment": "Observer les badges de sentiment sur les interventions du theme",
+    "dashboard": "Filtrer le dashboard par theme pour voir les statistiques globales"
+  }
+}

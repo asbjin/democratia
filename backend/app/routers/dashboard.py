@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 
 from ..database import get_db
 from ..models.depute import Depute
+from ..models.groupe import Groupe
 from ..models.intervention import Intervention
 from ..models.scrutin import Scrutin
 
@@ -108,18 +109,25 @@ def get_dashboard(
             for d in top_deputes
         ]
 
-        # Count by groupe politique
+        # Count by groupe politique with real names
         par_groupe = (
             db.query(
                 Depute.groupe_politique_id,
+                Groupe.nom,
+                Groupe.sigle,
                 func.count(Depute.id).label("count"),
             )
-            .group_by(Depute.groupe_politique_id)
+            .outerjoin(Groupe, Groupe.id == Depute.groupe_politique_id)
+            .group_by(Depute.groupe_politique_id, Groupe.nom, Groupe.sigle)
             .all()
         )
 
         par_groupe_list = [
-            {"groupe": g.groupe_politique_id or "Sans groupe", "count": g.count}
+            {
+                "groupe": g.nom or g.groupe_politique_id or "Sans groupe",
+                "sigle": g.sigle or "",
+                "count": g.count,
+            }
             for g in par_groupe
         ]
 
@@ -161,10 +169,32 @@ def get_dashboard(
                 db.rollback()
                 logger.warning("Failed to fetch timeline data")
 
-        # Stats
-        nb_deputes = depute_query.count()
-        nb_interventions = db.query(func.count(Intervention.id)).scalar() or 0
-        nb_scrutins = db.query(func.count(Scrutin.id)).scalar() or 0
+        # Stats (filtered by theme if provided)
+        if theme:
+            intervention_filter = db.query(Intervention).filter(
+                Intervention.texte.ilike(f"%{theme}%")
+            )
+            nb_interventions = intervention_filter.count()
+            nb_deputes = (
+                db.query(func.count(func.distinct(Intervention.depute_id)))
+                .filter(Intervention.texte.ilike(f"%{theme}%"))
+                .scalar()
+            ) or 0
+            if departement:
+                nb_deputes = (
+                    db.query(func.count(func.distinct(Intervention.depute_id)))
+                    .join(Depute, Depute.id == Intervention.depute_id)
+                    .filter(Intervention.texte.ilike(f"%{theme}%"))
+                    .filter(Depute.departement.ilike(f"%{departement}%"))
+                    .scalar()
+                ) or 0
+            nb_scrutins = db.query(func.count(Scrutin.id)).filter(
+                Scrutin.titre.ilike(f"%{theme}%")
+            ).scalar() or 0
+        else:
+            nb_deputes = depute_query.count()
+            nb_interventions = db.query(func.count(Intervention.id)).scalar() or 0
+            nb_scrutins = db.query(func.count(Scrutin.id)).scalar() or 0
 
         result = {
             "stats": {

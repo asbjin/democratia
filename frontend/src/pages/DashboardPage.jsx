@@ -26,16 +26,16 @@ function DashboardPage() {
     if (query) params.theme = query;
     if (departement) params.departement = departement;
 
-    Promise.all([
-      api.get("/dashboard", { params }),
-      api.get("/scrutins", { params: { theme: query || undefined, size: 5 } }),
-    ])
-      .then(([dashRes, scrutinRes]) => {
-        setData(dashRes.data);
-        setScrutins(scrutinRes.data.items || []);
-      })
+    api
+      .get("/dashboard", { params })
+      .then((dashRes) => setData(dashRes.data))
       .catch(() => setError("Erreur lors du chargement des donnees"))
       .finally(() => setLoading(false));
+
+    api
+      .get("/scrutins", { params: { theme: query || undefined, size: 5 } })
+      .then((scrutinRes) => setScrutins(scrutinRes.data.items || []))
+      .catch(() => setScrutins([]));
   }, [query, departement]);
 
   if (loading) {

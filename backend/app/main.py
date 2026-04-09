@@ -22,21 +22,12 @@ app = FastAPI(
     version="1.0.0",
 )
 
-# CORS: restrict in production, allow all in development
-ALLOWED_ORIGINS = [
-    "http://localhost",
-    "http://localhost:3000",
-    "http://localhost:5173",
-]
-if hasattr(settings, "CORS_ORIGINS") and settings.CORS_ORIGINS:
-    ALLOWED_ORIGINS = [o.strip() for o in settings.CORS_ORIGINS.split(",")]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=ALLOWED_ORIGINS,
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
-    allow_headers=["Content-Type", "Authorization"],
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # Rate limiting: 100 requests per minute per IP

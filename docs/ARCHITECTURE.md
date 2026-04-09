@@ -41,7 +41,7 @@ graph LR
         SENT[Sentiment Analyzer]
         THEME[Theme Extractor]
         SYN[Synonymes<br/>parlementaires]
-        LLM[LLM API<br/>Sonnet]
+        LLM[Groq API<br/>Llama 3.3 70B]
     end
 
     subgraph Frontend

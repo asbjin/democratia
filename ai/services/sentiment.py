@@ -2,11 +2,11 @@
 
 import json
 
-import anthropic
+from groq import Groq
 from pydantic import BaseModel
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from ..config import ANTHROPIC_API_KEY
+from ..config import GROQ_API_KEY
 
 
 class SentimentResult(BaseModel):
@@ -19,8 +19,8 @@ class SentimentAnalyzer:
     """Analyze sentiment of parliamentary texts."""
 
     def __init__(self):
-        self.client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-        self.model = "claude-sonnet-4-20250514"
+        self.client = Groq(api_key=GROQ_API_KEY)
+        self.model = "llama-3.3-70b-versatile"
 
     @retry(
         stop=stop_after_attempt(3),
@@ -57,20 +57,20 @@ class SentimentAnalyzer:
             "- explanation : explication en une phrase"
         )
 
-        message = self.client.messages.create(
+        response = self.client.chat.completions.create(
             model=self.model,
             max_tokens=300,
-            system=system_prompt,
-            messages=[{"role": "user", "content": user_prompt}],
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
         )
 
-        response_text = message.content[0].text.strip()
+        response_text = response.choices[0].message.content.strip()
 
-        # Extract JSON from response
         try:
             result = json.loads(response_text)
         except json.JSONDecodeError:
-            # Try to find JSON in the response
             start = response_text.find("{")
             end = response_text.rfind("}") + 1
             if start >= 0 and end > start:

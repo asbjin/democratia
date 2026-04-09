@@ -1,17 +1,19 @@
 # DemocratIA - Parliamentary text summarizer
 
-import anthropic
+import os
+
+from groq import Groq
 from tenacity import retry, stop_after_attempt, wait_exponential
 
-from ..config import ANTHROPIC_API_KEY
+from ..config import GROQ_API_KEY
 
 
 class Summarizer:
     """Generate accessible summaries of parliamentary texts."""
 
     def __init__(self):
-        self.client = anthropic.Anthropic(api_key=ANTHROPIC_API_KEY)
-        self.model = "claude-sonnet-4-20250514"
+        self.client = Groq(api_key=GROQ_API_KEY)
+        self.model = "llama-3.3-70b-versatile"
 
     @retry(
         stop=stop_after_attempt(3),
@@ -57,11 +59,13 @@ class Summarizer:
             f"{text}"
         )
 
-        message = self.client.messages.create(
+        response = self.client.chat.completions.create(
             model=self.model,
             max_tokens=500,
-            system=system_prompt,
-            messages=[{"role": "user", "content": user_prompt}],
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt},
+            ],
         )
 
-        return message.content[0].text
+        return response.choices[0].message.content

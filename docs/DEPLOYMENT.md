@@ -44,7 +44,7 @@ POSTGRES_USER=democratia
 POSTGRES_PASSWORD=<mot_de_passe_fort>
 POSTGRES_DB=democratia
 DATABASE_URL=postgresql://democratia:<mot_de_passe>@db:5432/democratia
-ANTHROPIC_API_KEY=sk-ant-<votre_cle>
+GROQ_API_KEY=gsk_<votre_cle>
 VITE_API_URL=https://votre-domaine.fr/api
 ```
 

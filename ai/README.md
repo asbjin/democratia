@@ -50,7 +50,7 @@ python ai/scripts/batch_sentiment.py
 
 ## Modele utilise
 
-- **Modele** : LLM Sonnet (derniere version)
+- **Modele** : Llama 3.3 70B Versatile (via Groq)
 - **Max tokens** : 300-500 selon le service
 - **Retry** : 3 tentatives avec backoff exponentiel
 
@@ -68,7 +68,7 @@ Le cache reduit les couts en evitant les appels redondants.
 
 Variable d'environnement requise :
 ```
-ANTHROPIC_API_KEY=sk-ant-...
+GROQ_API_KEY=gsk_xxxxx
 ```
 
 Le module fonctionne en mode degrade sans cle API (warnings au demarrage).

@@ -1,6 +1,10 @@
 # DemocratIA - IA endpoints with caching
 
+import json
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException
+from groq import Groq
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
@@ -11,23 +15,24 @@ from ..config import settings
 
 router = APIRouter()
 
+LLM_MODEL = "llama-3.3-70b-versatile"
+
 
 class ResumeRequest(BaseModel):
-    intervention_id: str | None = None
-    text: str | None = None
+    intervention_id: Optional[str] = None
+    text: Optional[str] = None
     context: str = ""
 
 
 class SentimentRequest(BaseModel):
-    text: str | None = None
-    intervention_id: str | None = None
+    text: Optional[str] = None
+    intervention_id: Optional[str] = None
     theme: str = ""
 
 
 def _get_llm_client():
-    """Create LLM client instance."""
-    import anthropic
-    return anthropic.Anthropic(api_key=settings.ANTHROPIC_API_KEY)
+    """Create Groq LLM client instance."""
+    return Groq(api_key=settings.GROQ_API_KEY)
 
 
 @router.post("/ia/resume")
@@ -70,13 +75,15 @@ def generate_resume(req: ResumeRequest, db: Session = Depends(get_db)):
         user_prompt += f"Contexte : {req.context}\n\n"
     user_prompt += f"Texte :\n{text}"
 
-    message = client.messages.create(
-        model="claude-sonnet-4-20250514",
+    response = client.chat.completions.create(
+        model=LLM_MODEL,
         max_tokens=500,
-        system=system_prompt,
-        messages=[{"role": "user", "content": user_prompt}],
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
     )
-    resume_text = message.content[0].text
+    resume_text = response.choices[0].message.content
 
     # Store in cache
     if intervention_id:
@@ -125,8 +132,6 @@ def analyze_sentiment(req: SentimentRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="No text available")
 
     # Call LLM
-    import json
-
     client = _get_llm_client()
     system_prompt = (
         "Tu es un analyste politique objectif. Tu analyses le sentiment "
@@ -143,14 +148,16 @@ def analyze_sentiment(req: SentimentRequest, db: Session = Depends(get_db)):
         '"explanation": "explication courte en francais"}\n\n'
     )
 
-    message = client.messages.create(
-        model="claude-sonnet-4-20250514",
+    response = client.chat.completions.create(
+        model=LLM_MODEL,
         max_tokens=300,
-        system=system_prompt,
-        messages=[{"role": "user", "content": user_prompt}],
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_prompt},
+        ],
     )
 
-    response_text = message.content[0].text.strip()
+    response_text = response.choices[0].message.content.strip()
     try:
         result = json.loads(response_text)
     except json.JSONDecodeError:

@@ -3,8 +3,8 @@
 import os
 
 
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 
-if not ANTHROPIC_API_KEY:
+if not GROQ_API_KEY:
     import warnings
-    warnings.warn("ANTHROPIC_API_KEY not set. AI features will not work.")
+    warnings.warn("GROQ_API_KEY not set. AI features will not work.")

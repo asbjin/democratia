@@ -20,8 +20,6 @@ function DeputePage() {
   const [activite, setActivite] = useState(null);
   const [votes, setVotes] = useState(null);
   const [tabLoading, setTabLoading] = useState(false);
-  const [resume, setResume] = useState(null);
-  const [resumeLoading, setResumeLoading] = useState(false);
   const [groupeNom, setGroupeNom] = useState(null);
 
   useEffect(() => {
@@ -78,38 +76,6 @@ function DeputePage() {
       setTabLoading(false);
     }
   }, [activeTab, activite, votes, depute]);
-
-  const handleResume = () => {
-    if (resume || resumeLoading) return;
-    if (!activite?.interventions?.length) return;
-
-    setResumeLoading(true);
-    const text = activite.interventions
-      .slice(0, 3)
-      .map((i) => i.texte)
-      .filter(Boolean)
-      .join("\n\n");
-
-    if (!text) {
-      setResumeLoading(false);
-      return;
-    }
-
-    api
-      .post("/ia/resume", {
-        text,
-        context: `Depute: ${depute.prenom} ${depute.nom}`,
-      })
-      .then((res) => setResume(res.data))
-      .catch(() => setResume({ resume: "Resume non disponible", cached: false }))
-      .finally(() => setResumeLoading(false));
-  };
-
-  useEffect(() => {
-    if (activeTab === "resume" && activite) {
-      handleResume();
-    }
-  }, [activeTab, activite]);
 
   if (loading) {
     return (
@@ -379,26 +345,35 @@ function DeputePage() {
               {activeTab === "resume" && (
                 <div>
                   <h3 className="font-semibold text-lg mb-4">
-                    Resume par intelligence artificielle
+                    Resumes par intelligence artificielle
                   </h3>
-                  {resumeLoading ? (
-                    <div className="flex items-center gap-3 py-6">
-                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
-                      <p className="text-gray-500">
-                        Generation du resume en cours...
-                      </p>
-                    </div>
-                  ) : resume ? (
-                    <div className="bg-blue-50 rounded-lg p-5">
-                      <p className="text-gray-700 leading-relaxed">
-                        {resume.resume}
-                      </p>
-                      {resume.cached && (
-                        <p className="text-xs text-gray-400 mt-3">
-                          Resume en cache
-                        </p>
-                      )}
-                    </div>
+                  <p className="text-sm text-gray-500 mb-4">
+                    Cliquez sur &laquo; Generer le resume &raquo; pour obtenir un resume accessible de chaque intervention.
+                  </p>
+                  {activite?.interventions?.length > 0 ? (
+                    <ul className="space-y-4">
+                      {activite.interventions.map((intervention, idx) => (
+                        <li
+                          key={idx}
+                          className="border-l-4 border-blue-400 pl-4 py-2"
+                        >
+                          <p className="text-xs text-gray-400 mb-1">
+                            {intervention.date} &mdash;{" "}
+                            {intervention.type_seance || "Seance"}
+                          </p>
+                          <p className="text-sm text-gray-700 line-clamp-2">
+                            {intervention.texte?.slice(0, 200)}
+                            {intervention.texte?.length > 200 ? "..." : ""}
+                          </p>
+                          {intervention.texte && (
+                            <AISummary
+                              text={intervention.texte}
+                              context={`Intervention de ${depute.prenom} ${depute.nom}`}
+                            />
+                          )}
+                        </li>
+                      ))}
+                    </ul>
                   ) : (
                     <p className="text-gray-400 text-center py-6">
                       Aucune intervention disponible pour generer un resume.

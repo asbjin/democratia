@@ -1,7 +1,9 @@
-"""Dashboard aggregation endpoint."""
+"""Dashboard aggregation endpoint with in-memory TTL cache."""
+
+import time
 
 from fastapi import APIRouter, Depends, Query
-from sqlalchemy import func, extract
+from sqlalchemy import func, extract, text
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -11,6 +13,25 @@ from ..models.scrutin import Scrutin
 
 router = APIRouter()
 
+# In-memory cache with TTL (5 minutes)
+_cache: dict[str, tuple[float, dict]] = {}
+_CACHE_TTL = 300  # seconds
+
+
+def _get_cached(key: str) -> dict | None:
+    """Return cached value if TTL has not expired."""
+    if key in _cache:
+        ts, data = _cache[key]
+        if time.time() - ts < _CACHE_TTL:
+            return data
+        del _cache[key]
+    return None
+
+
+def _set_cached(key: str, data: dict) -> None:
+    """Store data in cache with current timestamp."""
+    _cache[key] = (time.time(), data)
+
 
 @router.get("/dashboard")
 def get_dashboard(
@@ -18,6 +39,11 @@ def get_dashboard(
     departement: str | None = None,
     db: Session = Depends(get_db),
 ):
+    cache_key = f"dashboard:{theme or ''}:{departement or ''}"
+    cached = _get_cached(cache_key)
+    if cached:
+        return cached
+
     # Base query for deputes
     depute_query = db.query(Depute)
     if departement:
@@ -71,33 +97,44 @@ def get_dashboard(
         for g in par_groupe
     ]
 
-    # Timeline: interventions per month
-    timeline = (
-        db.query(
-            extract("year", Intervention.date).label("year"),
-            extract("month", Intervention.date).label("month"),
-            func.count(Intervention.id).label("count"),
+    # Try to use materialized view for timeline, fallback to direct query
+    try:
+        mv_results = db.execute(
+            text("SELECT annee, mois, nb_interventions FROM mv_timeline ORDER BY annee, mois")
+        ).fetchall()
+        timeline_list = [
+            {
+                "period": f"{r.annee}-{r.mois:02d}",
+                "count": r.nb_interventions,
+            }
+            for r in mv_results
+        ]
+    except Exception:
+        timeline = (
+            db.query(
+                extract("year", Intervention.date).label("year"),
+                extract("month", Intervention.date).label("month"),
+                func.count(Intervention.id).label("count"),
+            )
+            .filter(Intervention.date.isnot(None))
+            .group_by("year", "month")
+            .order_by("year", "month")
+            .all()
         )
-        .filter(Intervention.date.isnot(None))
-        .group_by("year", "month")
-        .order_by("year", "month")
-        .all()
-    )
-
-    timeline_list = [
-        {
-            "period": f"{int(t.year)}-{int(t.month):02d}",
-            "count": t.count,
-        }
-        for t in timeline
-    ]
+        timeline_list = [
+            {
+                "period": f"{int(t.year)}-{int(t.month):02d}",
+                "count": t.count,
+            }
+            for t in timeline
+        ]
 
     # Stats
     nb_deputes = depute_query.count()
     nb_interventions = db.query(func.count(Intervention.id)).scalar() or 0
     nb_scrutins = db.query(func.count(Scrutin.id)).scalar() or 0
 
-    return {
+    result = {
         "stats": {
             "nb_deputes": nb_deputes,
             "nb_interventions": nb_interventions,
@@ -107,3 +144,6 @@ def get_dashboard(
         "par_groupe": par_groupe_list,
         "timeline": timeline_list,
     }
+
+    _set_cached(cache_key, result)
+    return result

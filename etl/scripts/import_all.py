@@ -12,6 +12,7 @@ from parse_acteurs import parse_all_acteurs
 from parse_scrutins import parse_all_scrutins
 from parse_questions import parse_all_questions
 from parse_amendements import parse_all_amendements
+from import_photos import import_photos
 
 logging.basicConfig(
     level=logging.INFO,
@@ -257,6 +258,13 @@ def main():
             import_questions(session, questions)
         if amendements:
             import_amendements(session, amendements)
+
+        # Step 4: Download deputy photos
+        logger.info("Step 4: Downloading deputy photos...")
+        try:
+            import_photos()
+        except Exception as e:
+            logger.warning(f"Photo import failed (non-fatal): {e}")
 
         logger.info("=== ETL Pipeline completed successfully ===")
     except Exception as e:

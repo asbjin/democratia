@@ -15,6 +15,7 @@ LEGISLATURE = "17"
 DATASETS = {
     "acteurs": f"{BASE_URL}/AMO/tous_acteurs_mandats_organes_xi_legislature/AMO30_tous_acteurs_tous_mandats_tous_organes_historique.json.zip",
     "scrutins": f"{BASE_URL}/LOI/scrutins/Scrutins_XVII.json.zip",
+    "comptes_rendus": f"{BASE_URL}/CR/seance/comptes-rendus-seance-XVII.json.zip",
 }
 
 DATA_DIR = Path(__file__).parent.parent / "data"

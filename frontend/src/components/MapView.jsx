@@ -117,7 +117,12 @@ function MapView({ onDepartmentClick, theme }) {
             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           />
-          <GeoJSON data={geoData} style={style} onEachFeature={onEachFeature} />
+          <GeoJSON
+            key={JSON.stringify(activityData)}
+            data={geoData}
+            style={style}
+            onEachFeature={onEachFeature}
+          />
         </MapContainer>
       </div>
       <div className="flex items-center gap-2 mt-3 text-xs text-gray-500">

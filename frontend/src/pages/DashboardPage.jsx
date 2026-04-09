@@ -40,7 +40,10 @@ function DashboardPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <p className="text-lg text-gray-500">Chargement...</p>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-lg text-gray-500">Chargement des donnees...</p>
+        </div>
       </div>
     );
   }
@@ -49,7 +52,15 @@ function DashboardPage() {
     return (
       <div className="max-w-7xl mx-auto px-4 py-10">
         <SearchBar />
-        <p className="text-center text-red-500 mt-10">{error}</p>
+        <div className="text-center mt-10">
+          <p className="text-red-500 text-lg mb-4">{error}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors"
+          >
+            Reessayer
+          </button>
+        </div>
       </div>
     );
   }

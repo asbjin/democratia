@@ -2,11 +2,24 @@ import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import api from "../services/api";
 
+const TABS = [
+  { key: "activite", label: "Activite" },
+  { key: "votes", label: "Votes" },
+  { key: "questions", label: "Questions" },
+  { key: "resume", label: "Resume IA" },
+];
+
 function DeputePage() {
   const { id } = useParams();
   const [depute, setDepute] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState("activite");
+  const [activite, setActivite] = useState(null);
+  const [votes, setVotes] = useState(null);
+  const [tabLoading, setTabLoading] = useState(false);
+  const [resume, setResume] = useState(null);
+  const [resumeLoading, setResumeLoading] = useState(false);
 
   useEffect(() => {
     setLoading(true);
@@ -17,10 +30,67 @@ function DeputePage() {
       .finally(() => setLoading(false));
   }, [id]);
 
+  useEffect(() => {
+    if (!depute) return;
+
+    if (activeTab === "activite" && !activite) {
+      setTabLoading(true);
+      api
+        .get(`/deputes/${id}/activite`)
+        .then((res) => setActivite(res.data))
+        .catch(() => {})
+        .finally(() => setTabLoading(false));
+    }
+
+    if (activeTab === "votes" && !votes) {
+      setTabLoading(true);
+      api
+        .get(`/deputes/${id}/votes`)
+        .then((res) => setVotes(res.data))
+        .catch(() => {})
+        .finally(() => setTabLoading(false));
+    }
+  }, [id, depute, activeTab, activite, votes]);
+
+  const handleResume = () => {
+    if (resume || resumeLoading) return;
+    if (!activite?.interventions?.length) return;
+
+    setResumeLoading(true);
+    const text = activite.interventions
+      .slice(0, 3)
+      .map((i) => i.texte)
+      .filter(Boolean)
+      .join("\n\n");
+
+    if (!text) {
+      setResumeLoading(false);
+      return;
+    }
+
+    api
+      .post("/ia/resume", {
+        text,
+        context: `Depute: ${depute.prenom} ${depute.nom}`,
+      })
+      .then((res) => setResume(res.data))
+      .catch(() => setResume({ resume: "Resume non disponible", cached: false }))
+      .finally(() => setResumeLoading(false));
+  };
+
+  useEffect(() => {
+    if (activeTab === "resume" && activite) {
+      handleResume();
+    }
+  }, [activeTab, activite]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
-        <p className="text-lg text-gray-500">Chargement...</p>
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-lg text-gray-500">Chargement...</p>
+        </div>
       </div>
     );
   }
@@ -37,7 +107,7 @@ function DeputePage() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8">
+    <div className="max-w-5xl mx-auto px-4 py-8">
       <Link
         to="/dashboard"
         className="text-accent hover:underline text-sm mb-6 block"
@@ -45,7 +115,8 @@ function DeputePage() {
         &larr; Retour au dashboard
       </Link>
 
-      <div className="bg-white rounded-lg shadow-lg p-8">
+      {/* Header */}
+      <div className="bg-white rounded-lg shadow-lg p-8 mb-6">
         <div className="flex items-start gap-6">
           {depute.photo_url && (
             <img
@@ -54,7 +125,7 @@ function DeputePage() {
               className="w-32 h-32 rounded-lg object-cover"
             />
           )}
-          <div>
+          <div className="flex-1">
             <h1 className="text-3xl font-bold text-primary">
               {depute.prenom} {depute.nom}
             </h1>
@@ -63,39 +134,242 @@ function DeputePage() {
                 {depute.groupe_politique_id}
               </span>
             )}
+
+            {/* Indicators */}
+            <div className="flex gap-6 mt-4">
+              {activite && (
+                <>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-blue-600">
+                      {activite.total_interventions ?? 0}
+                    </p>
+                    <p className="text-xs text-gray-500">Interventions</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-green-600">
+                      {activite.total_votes ?? 0}
+                    </p>
+                    <p className="text-xs text-gray-500">Votes</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-purple-600">
+                      {activite.total_amendements ?? 0}
+                    </p>
+                    <p className="text-xs text-gray-500">Amendements</p>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
         </div>
 
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
           {depute.departement && (
             <div>
-              <p className="text-sm text-gray-400">Departement</p>
+              <p className="text-gray-400">Departement</p>
               <p className="font-medium">{depute.departement}</p>
             </div>
           )}
           {depute.circonscription && (
             <div>
-              <p className="text-sm text-gray-400">Circonscription</p>
+              <p className="text-gray-400">Circonscription</p>
               <p className="font-medium">{depute.circonscription}</p>
             </div>
           )}
           {depute.date_naissance && (
             <div>
-              <p className="text-sm text-gray-400">Date de naissance</p>
+              <p className="text-gray-400">Naissance</p>
               <p className="font-medium">{depute.date_naissance}</p>
             </div>
           )}
           {depute.profession && (
             <div>
-              <p className="text-sm text-gray-400">Profession</p>
+              <p className="text-gray-400">Profession</p>
               <p className="font-medium">{depute.profession}</p>
             </div>
           )}
-          {depute.sexe && (
-            <div>
-              <p className="text-sm text-gray-400">Civilite</p>
-              <p className="font-medium">{depute.sexe}</p>
+        </div>
+      </div>
+
+      {/* Tabs */}
+      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+        <div className="flex border-b">
+          {TABS.map((tab) => (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex-1 py-3 px-4 text-sm font-medium transition-colors ${
+                activeTab === tab.key
+                  ? "text-primary border-b-2 border-primary bg-blue-50"
+                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div className="p-6">
+          {tabLoading ? (
+            <div className="flex justify-center py-10">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
             </div>
+          ) : (
+            <>
+              {/* Activite tab */}
+              {activeTab === "activite" && activite && (
+                <div>
+                  <h3 className="font-semibold text-lg mb-4">
+                    Dernieres interventions
+                  </h3>
+                  {activite.interventions?.length > 0 ? (
+                    <ul className="space-y-4">
+                      {activite.interventions.map((intervention, idx) => (
+                        <li
+                          key={idx}
+                          className="border-l-4 border-blue-400 pl-4 py-2"
+                        >
+                          <p className="text-xs text-gray-400 mb-1">
+                            {intervention.date} &mdash;{" "}
+                            {intervention.type_seance || "Seance"}
+                          </p>
+                          <p className="text-sm text-gray-700 line-clamp-3">
+                            {intervention.texte?.slice(0, 300)}
+                            {intervention.texte?.length > 300 ? "..." : ""}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-gray-400 text-center py-6">
+                      Aucune intervention enregistree
+                    </p>
+                  )}
+
+                  {activite.amendements?.length > 0 && (
+                    <>
+                      <h3 className="font-semibold text-lg mt-8 mb-4">
+                        Derniers amendements
+                      </h3>
+                      <ul className="space-y-3">
+                        {activite.amendements.map((a, idx) => (
+                          <li
+                            key={idx}
+                            className="border-l-4 border-purple-400 pl-4 py-2"
+                          >
+                            <p className="text-xs text-gray-400 mb-1">
+                              {a.date} &mdash; {a.sort || "En cours"}
+                            </p>
+                            <p className="text-sm text-gray-700 line-clamp-2">
+                              {a.objet || a.texte?.slice(0, 200)}
+                            </p>
+                          </li>
+                        ))}
+                      </ul>
+                    </>
+                  )}
+                </div>
+              )}
+
+              {/* Votes tab */}
+              {activeTab === "votes" && votes && (
+                <div>
+                  <h3 className="font-semibold text-lg mb-4">
+                    Historique des votes ({votes.total ?? 0})
+                  </h3>
+                  {votes.items?.length > 0 ? (
+                    <div className="overflow-x-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-gray-50">
+                          <tr>
+                            <th className="text-left px-3 py-2">Date</th>
+                            <th className="text-left px-3 py-2">Scrutin</th>
+                            <th className="text-center px-3 py-2">Position</th>
+                            <th className="text-center px-3 py-2">Resultat</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {votes.items.map((v, idx) => (
+                            <tr key={idx} className="border-b">
+                              <td className="px-3 py-2 text-gray-500">
+                                {v.date}
+                              </td>
+                              <td className="px-3 py-2 max-w-xs truncate">
+                                {v.titre}
+                              </td>
+                              <td className="px-3 py-2 text-center">
+                                <span
+                                  className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${
+                                    v.position === "pour"
+                                      ? "bg-green-100 text-green-700"
+                                      : v.position === "contre"
+                                      ? "bg-red-100 text-red-700"
+                                      : "bg-gray-100 text-gray-700"
+                                  }`}
+                                >
+                                  {v.position}
+                                </span>
+                              </td>
+                              <td className="px-3 py-2 text-center text-xs text-gray-500">
+                                {v.nb_pour}P / {v.nb_contre}C / {v.nb_abstention}A
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 text-center py-6">
+                      Aucun vote enregistre
+                    </p>
+                  )}
+                </div>
+              )}
+
+              {/* Questions tab */}
+              {activeTab === "questions" && activite && (
+                <div>
+                  <h3 className="font-semibold text-lg mb-4">
+                    Questions au gouvernement
+                  </h3>
+                  <p className="text-gray-400 text-center py-6">
+                    Les questions seront affichees dans une prochaine mise a jour.
+                  </p>
+                </div>
+              )}
+
+              {/* Resume IA tab */}
+              {activeTab === "resume" && (
+                <div>
+                  <h3 className="font-semibold text-lg mb-4">
+                    Resume par intelligence artificielle
+                  </h3>
+                  {resumeLoading ? (
+                    <div className="flex items-center gap-3 py-6">
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                      <p className="text-gray-500">
+                        Generation du resume en cours...
+                      </p>
+                    </div>
+                  ) : resume ? (
+                    <div className="bg-blue-50 rounded-lg p-5">
+                      <p className="text-gray-700 leading-relaxed">
+                        {resume.resume}
+                      </p>
+                      {resume.cached && (
+                        <p className="text-xs text-gray-400 mt-3">
+                          Resume en cache
+                        </p>
+                      )}
+                    </div>
+                  ) : (
+                    <p className="text-gray-400 text-center py-6">
+                      Aucune intervention disponible pour generer un resume.
+                    </p>
+                  )}
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

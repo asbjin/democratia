@@ -160,10 +160,29 @@ def get_depute_votes(
     if not depute:
         raise HTTPException(status_code=404, detail="Depute not found")
 
-    query = (
-        db.query(Vote, Scrutin)
-        .join(Scrutin, Scrutin.id == Vote.scrutin_id)
+    # Use distinct on scrutin_id to avoid duplicates from seed data
+    subquery = (
+        db.query(
+            Vote.scrutin_id,
+            func.min(Vote.position).label("position"),
+        )
         .filter(Vote.depute_id == depute_id)
+        .group_by(Vote.scrutin_id)
+        .subquery()
+    )
+
+    query = (
+        db.query(
+            subquery.c.scrutin_id,
+            subquery.c.position,
+            Scrutin.id,
+            Scrutin.titre,
+            Scrutin.date,
+            Scrutin.nb_pour,
+            Scrutin.nb_contre,
+            Scrutin.nb_abstention,
+        )
+        .join(Scrutin, Scrutin.id == subquery.c.scrutin_id)
     )
     total = query.count()
     results = query.order_by(Scrutin.date.desc()).offset((page - 1) * size).limit(size).all()
@@ -175,13 +194,13 @@ def get_depute_votes(
         "size": size,
         "items": [
             {
-                "scrutin_id": r.Scrutin.id,
-                "titre": r.Scrutin.titre,
-                "date": r.Scrutin.date,
-                "position": r.Vote.position,
-                "nb_pour": r.Scrutin.nb_pour,
-                "nb_contre": r.Scrutin.nb_contre,
-                "nb_abstention": r.Scrutin.nb_abstention,
+                "scrutin_id": r.scrutin_id,
+                "titre": r.titre,
+                "date": r.date,
+                "position": r.position,
+                "nb_pour": r.nb_pour,
+                "nb_contre": r.nb_contre,
+                "nb_abstention": r.nb_abstention,
             }
             for r in results
         ],

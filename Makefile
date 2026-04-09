@@ -1,4 +1,4 @@
-.PHONY: up down logs test etl seed migrate clean status
+.PHONY: up down logs test etl seed migrate clean status monitor
 
 up:
 	docker compose up -d
@@ -24,6 +24,9 @@ migrate:
 
 status:
 	docker compose ps
+
+monitor:
+	bash scripts/monitor.sh
 
 clean:
 	docker compose down -v --remove-orphans

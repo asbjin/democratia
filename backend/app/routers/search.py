@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 from ..database import get_db
 from ..models.intervention import Intervention
 from ..models.depute import Depute
+from ..services.synonyms import get_tsquery_expanded
 
 router = APIRouter()
 
@@ -18,7 +19,9 @@ def search_interventions(
     size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
-    ts_query = func.to_tsquery("french", func.unaccent(q.replace(" ", " & ")))
+    # Expand query with parliamentary synonyms
+    expanded = get_tsquery_expanded(q)
+    ts_query = func.to_tsquery("french", func.unaccent(expanded.replace(" ", " & ")))
 
     query = (
         db.query(

@@ -266,6 +266,19 @@ def main():
         except Exception as e:
             logger.warning(f"Photo import failed (non-fatal): {e}")
 
+        # Step 5: Print global stats
+        logger.info("Step 5: Database statistics")
+        nb_deputes = session.query(Depute).count()
+        nb_scrutins_db = session.query(Scrutin).count()
+        nb_votes = session.query(Vote).count()
+        nb_questions = session.query(Question).count()
+        nb_amendements = session.query(Amendement).count()
+        logger.info(f"  Deputes:      {nb_deputes}")
+        logger.info(f"  Scrutins:     {nb_scrutins_db}")
+        logger.info(f"  Votes:        {nb_votes}")
+        logger.info(f"  Questions:    {nb_questions}")
+        logger.info(f"  Amendements:  {nb_amendements}")
+
         logger.info("=== ETL Pipeline completed successfully ===")
     except Exception as e:
         session.rollback()

@@ -1,8 +1,12 @@
 """Full-text search endpoint."""
 
+import logging
+
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, text
 from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
 
 from ..database import get_db
 from ..models.intervention import Intervention
@@ -19,6 +23,7 @@ def search_interventions(
     size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
 ):
+    logger.info(f"GET /search q={q} page={page}")
     # Expand query with parliamentary synonyms
     expanded = get_tsquery_expanded(q)
     ts_query = func.to_tsquery("french", func.unaccent(expanded.replace(" ", " & ")))

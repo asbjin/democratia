@@ -1,9 +1,12 @@
 """Dashboard aggregation endpoint with in-memory TTL cache."""
 
+import logging
 import time
 
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy import func, extract, text
+
+logger = logging.getLogger(__name__)
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -39,9 +42,11 @@ def get_dashboard(
     departement: str | None = None,
     db: Session = Depends(get_db),
 ):
+    logger.info(f"GET /dashboard theme={theme} dept={departement}")
     cache_key = f"dashboard:{theme or ''}:{departement or ''}"
     cached = _get_cached(cache_key)
     if cached:
+        logger.info("GET /dashboard served from cache")
         return cached
 
     # Base query for deputes

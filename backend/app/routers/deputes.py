@@ -1,8 +1,12 @@
 """Deputes API endpoints."""
 
+import logging
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
+
+logger = logging.getLogger(__name__)
 
 from ..database import get_db
 from ..models.depute import Depute
@@ -38,6 +42,7 @@ def list_deputes(
     departement: str | None = None,
     db: Session = Depends(get_db),
 ):
+    logger.info(f"GET /deputes page={page} size={size} groupe={groupe} dept={departement}")
     query = db.query(Depute)
 
     if groupe:
@@ -47,6 +52,7 @@ def list_deputes(
 
     total = query.count()
     items = query.offset((page - 1) * size).limit(size).all()
+    logger.info(f"GET /deputes returned {total} results")
 
     return DeputeList(items=items, total=total, page=page, size=size)
 

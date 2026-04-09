@@ -39,16 +39,19 @@ backend/app/main.py, config.py, database.py
 backend/app/models/ : depute.py, groupe.py, dossier.py, intervention.py, scrutin.py, vote.py, question.py, amendement.py, ia_cache.py
 backend/app/routers/ : health.py, deputes.py, search.py, dashboard.py, scrutins.py, groupes.py, ia.py
 backend/app/schemas/ : depute.py, activite.py, scrutin.py, groupe.py
-backend/tests/ : conftest.py, test_health.py, test_deputes.py
-frontend/src/pages/ : HomePage.jsx, DashboardPage.jsx, DeputePage.jsx
-frontend/src/components/ : Navbar.jsx, SearchBar.jsx, DeputeCard.jsx, Layout.jsx, StatCard.jsx, ActivityChart.jsx, TimelineChart.jsx, VoteBreakdown.jsx
+backend/app/services/ : synonyms.py
+backend/tests/ : conftest.py, test_health.py, test_deputes.py, test_scrutins.py, test_groupes.py
+frontend/src/pages/ : HomePage.jsx, DashboardPage.jsx, DeputePage.jsx, GroupesPage.jsx
+frontend/src/components/ : Navbar.jsx, SearchBar.jsx, DeputeCard.jsx, Layout.jsx, StatCard.jsx, ActivityChart.jsx, TimelineChart.jsx, VoteBreakdown.jsx, MapView.jsx, AISummary.jsx, SentimentBadge.jsx
 frontend/src/services/api.js
-etl/scripts/ : download.py, parse_acteurs.py, parse_scrutins.py, parse_questions.py, parse_amendements.py, import_all.py, seed_test_data.py
+frontend/public/ : departements.geojson, photos/
+etl/scripts/ : download.py, parse_acteurs.py, parse_scrutins.py, parse_questions.py, parse_amendements.py, import_all.py, seed_test_data.py, import_geo.py, import_photos.py
 etl/fixtures/ : seed_data.json
 ai/services/ : summarizer.py, sentiment.py, theme_extractor.py
-ai/config.py
+ai/scripts/ : batch_sentiment.py
+ai/config.py, ai/README.md
 docker-compose.yml, Makefile, README.md, .gitignore, .env.example
-db/init.sql, nginx/nginx.conf, nginx/ssl-setup.sh, scripts/git-as.sh
+db/init.sql, nginx/nginx.conf, nginx/ssl-setup.sh, scripts/git-as.sh, scripts/monitor.sh
 .github/workflows/ci.yml
 # Avancement DemocratIA
 
@@ -81,20 +84,20 @@ db/init.sql, nginx/nginx.conf, nginx/ssl-setup.sh, scripts/git-as.sh
 5. ✅ Amelioration prompts parlementaires + theme_extractor.py → Anis
 6. ✅ ssl-setup.sh + healthchecks Docker + make seed → Yassine
 
-## Sprint 4 📋
-1. Carte Leaflet par département → Ceran
-2. Endpoint /api/dashboard/geo → Walid
-3. Import données géographiques → Youva
-4. Sentiment batch → Anis
-5. Monitoring + healthchecks → Yassine
+## Sprint 4 ✅ DONE — Tag v0.4.0
+1. ✅ Carte Leaflet interactive avec filtrage departement → Ceran
+2. ✅ GET /api/dashboard/geo + GET /api/deputes/nearby → Walid
+3. ✅ import_geo.py + departements.geojson → Youva
+4. ✅ batch_sentiment.py (lots de 10, stats finales) → Anis
+5. ✅ monitor.sh + make monitor → Yassine
 
-## Sprint 5 📋
-1. Composants AISummary + SentimentBadge → Ceran
-2. Page groupes politiques → Ceran
-3. Recherche sémantique pgvector → Anis
-4. Endpoint dashboard groupe → Walid
-5. Photos députés + comptes rendus → Youva
-6. Tests e2e → Yassine
+## Sprint 5 ✅ DONE — Tag v0.5.0
+1. ✅ AISummary.jsx + SentimentBadge.jsx + integration DeputePage → Ceran
+2. ✅ GroupesPage.jsx + route /groupes + lien Navbar → Ceran
+3. ✅ Synonymes parlementaires + enrichissement search.py → Anis
+4. ✅ GET /api/groupes/{id}/dashboard (cohesion, top deputes, timeline) → Walid
+5. ✅ import_photos.py + comptes rendus dans download.py → Youva
+6. ✅ test_scrutins.py + test_groupes.py → Yassine
 
 ## Sprint 6 📋
 1. docs/DEPLOYMENT.md → Yassine
@@ -105,8 +108,8 @@ db/init.sql, nginx/nginx.conf, nginx/ssl-setup.sh, scripts/git-as.sh
 6. Tag v1.0.0
 
 ## NOTES IMPORTANTES
-- Sprints 0-3 : TERMINÉS
-- Prochaine tâche : Sprint 4 tâche 1 (carte Leaflet, Ceran)
+- Sprints 0-5 : TERMINÉS
+- Prochaine tâche : Sprint 6 tâche 1 (docs/DEPLOYMENT.md, Yassine)
 - Le projet n'a PAS besoin de tourner réellement, juste du code propre sur GitHub
 - Pas besoin de clé API, pas besoin de Docker lancé
 - Le code doit être syntaxiquement correct et cohérent entre les fichiers

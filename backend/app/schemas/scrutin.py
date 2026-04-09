@@ -3,7 +3,7 @@
 from datetime import date
 from typing import Optional
 
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 
 
 class VoteGroupe(BaseModel):
@@ -22,6 +22,20 @@ class ScrutinResponse(BaseModel):
     nb_contre: int = 0
     nb_abstention: int = 0
     dossier_id: Optional[str] = None
+
+    @field_validator("date", mode="before")
+    @classmethod
+    def parse_date(cls, v):
+        if v is None:
+            return None
+        if isinstance(v, date):
+            return v
+        if isinstance(v, str):
+            try:
+                return date.fromisoformat(v)
+            except ValueError:
+                return None
+        return None
 
     class Config:
         from_attributes = True

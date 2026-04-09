@@ -1,5 +1,7 @@
 # DemocratIA - Scrutins API endpoints
 
+from typing import Optional
+
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session
@@ -16,7 +18,7 @@ router = APIRouter()
 
 @router.get("/scrutins", response_model=ScrutinList)
 def list_scrutins(
-    theme: str | None = None,
+    theme: Optional[str] = None,
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),

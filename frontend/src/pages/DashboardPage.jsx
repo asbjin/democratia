@@ -176,7 +176,7 @@ function DashboardPage() {
                 key={d.id}
                 depute={d}
                 groupes={groupes}
-                countLabel={query ? "votes sur ce theme" : "interventions"}
+                countLabel={query ? "interventions sur ce theme" : "interventions"}
               />
             ))}
           </div>

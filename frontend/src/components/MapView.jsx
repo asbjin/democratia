@@ -14,9 +14,9 @@ function stripAccents(str) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
-function buildDynamicScale(activityData) {
+function buildDynamicScale(activityData, metricKey) {
   const values = Object.values(activityData)
-    .map((d) => d.nb_interventions || 0)
+    .map((d) => d[metricKey] || 0)
     .filter((v) => v > 0);
 
   if (values.length === 0) return [];
@@ -76,12 +76,20 @@ function MapView({ onDepartmentClick, theme }) {
 
   if (!geoData) return null;
 
-  const scale = buildDynamicScale(activityData);
+  // Color by interventions when there is any; otherwise fall back to the number
+  // of active deputies so the map stays meaningful on data without comptes-rendus.
+  const hasInterventions = Object.values(activityData).some(
+    (d) => (d.nb_interventions || 0) > 0
+  );
+  const metricKey = hasInterventions ? "nb_interventions" : "nb_deputes_actifs";
+  const metricLabel = hasInterventions ? "Interventions" : "Deputes actifs";
+
+  const scale = buildDynamicScale(activityData, metricKey);
 
   const style = (feature) => {
     const nom = stripAccents(feature.properties.nom || feature.properties.code || "");
     const info = activityData[nom] || {};
-    const nb = info.nb_interventions || 0;
+    const nb = info[metricKey] || 0;
 
     return {
       fillColor: getColor(nb, scale),
@@ -142,7 +150,7 @@ function MapView({ onDepartmentClick, theme }) {
         </MapContainer>
       </div>
       <div className="flex items-center gap-2 mt-3 text-xs text-gray-500 flex-wrap">
-        <span>Interventions :</span>
+        <span>{metricLabel} :</span>
         <div className="flex items-center gap-1">
           <div className="w-4 h-3 rounded-sm" style={{ backgroundColor: NO_DATA_COLOR }} />
           <span>0</span>

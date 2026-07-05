@@ -17,6 +17,8 @@ DATASETS = {
     "acteurs": f"{BASE_URL}/{LEGISLATURE}/amo/deputes_actifs_mandats_actifs_organes_divises/AMO40_deputes_actifs_mandats_actifs_organes_divises.json.zip",
     # Scrutins publics de la legislature : un fichier JSON par scrutin
     "scrutins": f"{BASE_URL}/{LEGISLATURE}/loi/scrutins/Scrutins.json.zip",
+    # Comptes-rendus de seance (syceron, XML) : discours -> interventions
+    "comptes_rendus": f"{BASE_URL}/{LEGISLATURE}/vp/syceronbrut/syseron.xml.zip",
 }
 
 DATA_DIR = Path(__file__).parent.parent / "data"

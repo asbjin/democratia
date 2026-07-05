@@ -4,7 +4,7 @@ import logging
 import os
 import sys
 
-from sqlalchemy import create_engine, Column, String, Integer, Date, Text, ForeignKey
+from sqlalchemy import create_engine, Column, String, Integer, Date, Text, ForeignKey, text
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from download import download_all
@@ -12,6 +12,7 @@ from parse_acteurs import parse_all_acteurs, parse_all_groupes
 from parse_scrutins import parse_all_scrutins
 from parse_questions import parse_all_questions
 from parse_amendements import parse_all_amendements
+from parse_comptes_rendus import parse_all_comptes_rendus
 from import_photos import import_photos
 
 logging.basicConfig(
@@ -110,6 +111,18 @@ def import_groupes(session, groupes: list[dict]):
 
     session.commit()
     logger.info(f"Imported {count} new groupes")
+
+
+class Intervention(Base):
+    __tablename__ = "interventions"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    depute_id = Column(String, ForeignKey("deputes.id"), nullable=False)
+    dossier_id = Column(String, nullable=True)
+    date = Column(String)
+    texte = Column(Text)
+    type_seance = Column(String)
+    # search_vector (tsvector) is populated by a raw SQL UPDATE after insert.
 
 
 def import_deputes(session, acteurs: list[dict]):
@@ -244,6 +257,42 @@ def import_amendements(session, amendements: list[dict]):
     logger.info(f"Imported {count} new amendements")
 
 
+def import_interventions(session, interventions: list[dict]):
+    """Insert interventions (speeches) for known deputes, then build the FTS vector."""
+    existing_depute_ids = {d.id for d in session.query(Depute.id).all()}
+    batch = []
+    count = 0
+    for it in interventions:
+        if it["depute_id"] not in existing_depute_ids or not it.get("date"):
+            continue
+        batch.append({
+            "depute_id": it["depute_id"],
+            "date": it["date"],
+            "texte": it["texte"],
+            "type_seance": it.get("type_seance", ""),
+        })
+        count += 1
+        if len(batch) >= 5000:
+            session.bulk_insert_mappings(Intervention, batch)
+            session.commit()
+            batch = []
+            logger.info(f"  ... {count} interventions imported so far")
+
+    if batch:
+        session.bulk_insert_mappings(Intervention, batch)
+        session.commit()
+    logger.info(f"Imported {count} interventions")
+
+    # Populate the full-text search vector (matches search.py: french + unaccent)
+    logger.info("Building full-text search vectors...")
+    session.execute(text(
+        "UPDATE interventions "
+        "SET search_vector = to_tsvector('french', unaccent(coalesce(texte, ''))) "
+        "WHERE search_vector IS NULL"
+    ))
+    session.commit()
+
+
 def main():
     logger.info("=== DemocratIA ETL Pipeline ===")
 
@@ -263,6 +312,7 @@ def main():
     votes = []
     questions = []
     amendements = []
+    interventions = []
 
     if "acteurs" in datasets:
         acteurs = parse_all_acteurs(datasets["acteurs"])
@@ -278,6 +328,9 @@ def main():
 
     if "amendements" in datasets:
         amendements = parse_all_amendements(datasets["amendements"])
+
+    if "comptes_rendus" in datasets:
+        interventions = parse_all_comptes_rendus(datasets["comptes_rendus"])
 
     # Step 3: Import to database
     logger.info("Step 3: Importing to PostgreSQL...")
@@ -297,6 +350,8 @@ def main():
             import_questions(session, questions)
         if amendements:
             import_amendements(session, amendements)
+        if interventions:
+            import_interventions(session, interventions)
 
         # Step 4: Download deputy photos
         logger.info("Step 4: Downloading deputy photos...")
@@ -313,12 +368,14 @@ def main():
         nb_votes = session.query(Vote).count()
         nb_questions = session.query(Question).count()
         nb_amendements = session.query(Amendement).count()
+        nb_interventions = session.query(Intervention).count()
         logger.info(f"  Groupes:      {nb_groupes}")
         logger.info(f"  Deputes:      {nb_deputes}")
         logger.info(f"  Scrutins:     {nb_scrutins_db}")
         logger.info(f"  Votes:        {nb_votes}")
         logger.info(f"  Questions:    {nb_questions}")
         logger.info(f"  Amendements:  {nb_amendements}")
+        logger.info(f"  Interventions:{nb_interventions}")
 
         logger.info("=== ETL Pipeline completed successfully ===")
     except Exception as e:

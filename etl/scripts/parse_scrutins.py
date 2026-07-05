@@ -20,8 +20,8 @@ def parse_vote(vote_data: dict, scrutin_id: str) -> list[dict]:
         else:
             pos = "abstention"
 
-        group_data = vote_data.get(position, {})
-        votants = group_data.get("votant", [])
+        group_data = vote_data.get(position) or {}
+        votants = group_data.get("votant") or []
         if isinstance(votants, dict):
             votants = [votants]
 
@@ -66,13 +66,13 @@ def parse_scrutin(data: dict) -> tuple[dict, list[dict]]:
 
     # Parse individual votes
     all_votes = []
-    ventilation = scrutin.get("ventilationVotes", {}).get("organe", {})
-    groupes = ventilation.get("groupes", {}).get("groupe", [])
+    ventilation = (scrutin.get("ventilationVotes") or {}).get("organe") or {}
+    groupes = (ventilation.get("groupes") or {}).get("groupe") or []
     if isinstance(groupes, dict):
         groupes = [groupes]
 
     for groupe in groupes:
-        vote_data = groupe.get("vote", {}).get("decompteNominatif", {})
+        vote_data = (groupe.get("vote") or {}).get("decompteNominatif") or {}
         if vote_data:
             all_votes.extend(parse_vote(vote_data, uid))
 

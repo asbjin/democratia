@@ -68,6 +68,46 @@ def parse_acteur(data: dict) -> dict | None:
         return None
 
 
+def parse_groupe(data: dict) -> dict | None:
+    """Parse a GP (groupe politique) organe JSON into a flat dict."""
+    organe = data.get("organe", data)
+    if organe.get("codeType") != "GP":
+        return None
+
+    uid = organe.get("uid")
+    uid = uid["#text"] if isinstance(uid, dict) else uid
+    if not uid:
+        return None
+
+    couleur = organe.get("couleurAssociee")
+    if not isinstance(couleur, str):
+        couleur = ""
+
+    return {
+        "id": uid,
+        "nom": organe.get("libelle", "") or "",
+        "sigle": organe.get("libelleAbrege", "") or "",
+        "couleur": couleur,
+    }
+
+
+def parse_all_groupes(extract_dir: Path) -> list[dict]:
+    """Parse all GP organes into groupe dicts, deduplicated by id."""
+    groupes = {}
+    for json_file in find_json_files(extract_dir):
+        try:
+            with open(json_file, "r", encoding="utf-8") as f:
+                data = json.load(f)
+        except (json.JSONDecodeError, IOError):
+            continue
+        result = parse_groupe(data)
+        if result:
+            groupes[result["id"]] = result
+
+    logger.info(f"Parsed {len(groupes)} groupes politiques")
+    return list(groupes.values())
+
+
 def parse_all_acteurs(extract_dir: Path) -> list[dict]:
     """Parse all acteur JSON files from the extracted directory."""
     acteurs = []

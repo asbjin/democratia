@@ -8,7 +8,7 @@ from sqlalchemy import create_engine, Column, String, Integer, Date, Text, Forei
 from sqlalchemy.orm import declarative_base, sessionmaker
 
 from download import download_all
-from parse_acteurs import parse_all_acteurs
+from parse_acteurs import parse_all_acteurs, parse_all_groupes
 from parse_scrutins import parse_all_scrutins
 from parse_questions import parse_all_questions
 from parse_amendements import parse_all_amendements
@@ -26,6 +26,15 @@ DATABASE_URL = os.environ.get(
     "DATABASE_URL",
     "postgresql://democratia:democratia_secret@localhost:5432/democratia",
 )
+
+
+class Groupe(Base):
+    __tablename__ = "groupes"
+
+    id = Column(String, primary_key=True)
+    nom = Column(String, nullable=False)
+    sigle = Column(String)
+    couleur = Column(String)
 
 
 class Depute(Base):
@@ -86,19 +95,37 @@ class Amendement(Base):
     objet = Column(Text)
 
 
+def import_groupes(session, groupes: list[dict]):
+    """Insert political groups (parents of deputes via FK)."""
+    count = 0
+    for g in groupes:
+        if session.get(Groupe, g["id"]) is None:
+            session.add(Groupe(
+                id=g["id"],
+                nom=g["nom"],
+                sigle=g.get("sigle", ""),
+                couleur=g.get("couleur", ""),
+            ))
+            count += 1
+
+    session.commit()
+    logger.info(f"Imported {count} new groupes")
+
+
 def import_deputes(session, acteurs: list[dict]):
     """Insert or update deputes."""
     count = 0
     for acteur in acteurs:
         depute = session.get(Depute, acteur["uid"])
         if depute is None:
+            # Empty date/group would violate DATE / FK constraints -> use None
             depute = Depute(
                 id=acteur["uid"],
                 nom=acteur["nom"],
                 prenom=acteur["prenom"],
-                date_naissance=acteur.get("dateNaissance", ""),
+                date_naissance=acteur.get("dateNaissance") or None,
                 sexe=acteur.get("sexe", ""),
-                groupe_politique_id=acteur.get("groupe_politique", ""),
+                groupe_politique_id=acteur.get("groupe_politique") or None,
                 circonscription=acteur.get("circonscription", ""),
                 departement=acteur.get("departement", ""),
             )
@@ -118,11 +145,13 @@ def import_scrutins(session, scrutins: list[dict], votes: list[dict]):
             scrutin = Scrutin(
                 id=s["id"],
                 titre=s["titre"],
-                date=s["date"],
+                date=s["date"] or None,
                 nb_pour=s["nb_pour"],
                 nb_contre=s["nb_contre"],
                 nb_abstention=s["nb_abstention"],
-                dossier_id=s.get("dossier_id"),
+                # dossier_id kept null: dossiers are not imported by this pipeline,
+                # so a real dossierRef would violate the scrutins->dossiers FK.
+                dossier_id=None,
             )
             session.add(scrutin)
             scrutin_count += 1
@@ -130,24 +159,28 @@ def import_scrutins(session, scrutins: list[dict], votes: list[dict]):
     session.commit()
     logger.info(f"Imported {scrutin_count} new scrutins")
 
-    # Import votes (only for deputes that exist)
+    # Import votes (only for deputes that exist), bulk-inserted for volume
     existing_depute_ids = {d.id for d in session.query(Depute.id).all()}
+    batch = []
     vote_count = 0
     for v in votes:
         if v["depute_id"] in existing_depute_ids:
-            vote = Vote(
-                scrutin_id=v["scrutin_id"],
-                depute_id=v["depute_id"],
-                position=v["position"],
-            )
-            session.add(vote)
+            batch.append({
+                "scrutin_id": v["scrutin_id"],
+                "depute_id": v["depute_id"],
+                "position": v["position"],
+            })
             vote_count += 1
 
-            if vote_count % 5000 == 0:
+            if len(batch) >= 5000:
+                session.bulk_insert_mappings(Vote, batch)
                 session.commit()
+                batch = []
                 logger.info(f"  ... {vote_count} votes imported so far")
 
-    session.commit()
+    if batch:
+        session.bulk_insert_mappings(Vote, batch)
+        session.commit()
     logger.info(f"Imported {vote_count} votes")
 
 
@@ -225,6 +258,7 @@ def main():
     # Step 2: Parse
     logger.info("Step 2: Parsing data...")
     acteurs = []
+    groupes = []
     scrutins = []
     votes = []
     questions = []
@@ -232,6 +266,9 @@ def main():
 
     if "acteurs" in datasets:
         acteurs = parse_all_acteurs(datasets["acteurs"])
+        # Keep only the groups actually referenced by a depute (FK parents)
+        referenced = {a["groupe_politique"] for a in acteurs if a["groupe_politique"]}
+        groupes = [g for g in parse_all_groupes(datasets["acteurs"]) if g["id"] in referenced]
 
     if "scrutins" in datasets:
         scrutins, votes = parse_all_scrutins(datasets["scrutins"])
@@ -250,6 +287,8 @@ def main():
     session = Session()
 
     try:
+        if groupes:
+            import_groupes(session, groupes)
         if acteurs:
             import_deputes(session, acteurs)
         if scrutins:
@@ -268,11 +307,13 @@ def main():
 
         # Step 5: Print global stats
         logger.info("Step 5: Database statistics")
+        nb_groupes = session.query(Groupe).count()
         nb_deputes = session.query(Depute).count()
         nb_scrutins_db = session.query(Scrutin).count()
         nb_votes = session.query(Vote).count()
         nb_questions = session.query(Question).count()
         nb_amendements = session.query(Amendement).count()
+        logger.info(f"  Groupes:      {nb_groupes}")
         logger.info(f"  Deputes:      {nb_deputes}")
         logger.info(f"  Scrutins:     {nb_scrutins_db}")
         logger.info(f"  Votes:        {nb_votes}")

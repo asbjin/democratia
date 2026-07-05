@@ -13,9 +13,10 @@ BASE_URL = "https://data.assemblee-nationale.fr/static/openData/repository"
 LEGISLATURE = "17"
 
 DATASETS = {
-    "acteurs": f"{BASE_URL}/AMO/tous_acteurs_mandats_organes_xi_legislature/AMO30_tous_acteurs_tous_mandats_tous_organes_historique.json.zip",
-    "scrutins": f"{BASE_URL}/LOI/scrutins/Scrutins_XVII.json.zip",
-    "comptes_rendus": f"{BASE_URL}/CR/seance/comptes-rendus-seance-XVII.json.zip",
+    # 577 deputes actifs, structure divisee : un fichier JSON par acteur
+    "acteurs": f"{BASE_URL}/{LEGISLATURE}/amo/deputes_actifs_mandats_actifs_organes_divises/AMO40_deputes_actifs_mandats_actifs_organes_divises.json.zip",
+    # Scrutins publics de la legislature : un fichier JSON par scrutin
+    "scrutins": f"{BASE_URL}/{LEGISLATURE}/loi/scrutins/Scrutins.json.zip",
 }
 
 DATA_DIR = Path(__file__).parent.parent / "data"

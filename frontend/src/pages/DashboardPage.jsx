@@ -166,11 +166,18 @@ function DashboardPage() {
       {data?.top_deputes?.length > 0 && (
         <section className="mb-10">
           <h3 className="text-xl font-semibold text-primary mb-4">
-            Top 10 deputes les plus actifs
+            {query
+              ? `Deputes les plus actifs sur « ${query} »`
+              : "Top 10 deputes les plus actifs"}
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {data.top_deputes.map((d) => (
-              <DeputeCard key={d.id} depute={d} groupes={groupes} />
+              <DeputeCard
+                key={d.id}
+                depute={d}
+                groupes={groupes}
+                countLabel={query ? "votes sur ce theme" : "interventions"}
+              />
             ))}
           </div>
         </section>

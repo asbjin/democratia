@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-function DeputeCard({ depute, groupes }) {
+function DeputeCard({ depute, groupes, countLabel = "interventions" }) {
   const groupe = groupes?.[depute.groupe_politique_id];
   const groupeLabel = groupe?.sigle || groupe?.nom || depute.groupe_politique_id;
 
@@ -25,7 +25,7 @@ function DeputeCard({ depute, groupes }) {
       {depute.nb_interventions !== undefined && (
         <p className="text-sm text-gray-600 mt-2">
           <span className="font-medium">{depute.nb_interventions}</span>{" "}
-          interventions
+          {countLabel}
         </p>
       )}
     </Link>

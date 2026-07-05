@@ -13,6 +13,7 @@ from ..models.depute import Depute
 from ..models.groupe import Groupe
 from ..models.intervention import Intervention
 from ..models.scrutin import Scrutin
+from ..models.vote import Vote
 
 logger = logging.getLogger(__name__)
 
@@ -36,6 +37,22 @@ def _set_cached(key: str, data) -> None:
     _cache[key] = (time.time(), data)
 
 
+def _scrutin_timeline(db: Session, theme_like: Optional[str]):
+    """Scrutins per month, optionally filtered by theme (title ILIKE)."""
+    q = db.query(
+        extract("year", Scrutin.date).label("year"),
+        extract("month", Scrutin.date).label("month"),
+        func.count(Scrutin.id).label("count"),
+    ).filter(Scrutin.date.isnot(None))
+    if theme_like:
+        q = q.filter(Scrutin.titre.ilike(theme_like))
+    rows = q.group_by("year", "month").order_by("year", "month").all()
+    return [
+        {"period": f"{int(r.year)}-{int(r.month):02d}", "count": r.count}
+        for r in rows
+    ]
+
+
 @router.get("/dashboard")
 def get_dashboard(
     theme: Optional[str] = None,
@@ -49,61 +66,105 @@ def get_dashboard(
         return cached
 
     try:
-        # Build the theme filter for interventions (ILIKE on texte)
-        theme_filter = Intervention.texte.ilike(f"%{theme}%") if theme else None
+        theme_like = f"%{theme}%" if theme else None
 
-        # --- Top 10 deputies who talk about this theme ---
-        top_query = (
-            db.query(
-                Depute.id,
-                Depute.nom,
-                Depute.prenom,
-                Depute.groupe_politique_id,
-                Depute.departement,
-                func.count(Intervention.id).label("nb_interventions"),
+        if theme:
+            # --- Theme mode: aggregate from scrutins (title) + their votes ---
+            # A depute is "active on the theme" if they voted on a matching scrutin.
+
+            # Top 10 deputies by number of votes cast on theme-matching scrutins
+            top_query = (
+                db.query(
+                    Depute.id,
+                    Depute.nom,
+                    Depute.prenom,
+                    Depute.groupe_politique_id,
+                    Depute.departement,
+                    func.count(Vote.id).label("nb"),
+                )
+                .join(Vote, Vote.depute_id == Depute.id)
+                .join(Scrutin, Scrutin.id == Vote.scrutin_id)
+                .filter(Scrutin.titre.ilike(theme_like))
             )
-            .join(Intervention, Intervention.depute_id == Depute.id)
-        )
-        if theme_filter is not None:
-            top_query = top_query.filter(theme_filter)
-        if departement:
-            top_query = top_query.filter(Depute.departement.ilike(f"%{departement}%"))
-
-        top_deputes = (
-            top_query.group_by(Depute.id)
-            .order_by(func.count(Intervention.id).desc())
-            .limit(10)
-            .all()
-        )
-
-        top_deputes_list = [
-            {
-                "id": d.id,
-                "nom": d.nom,
-                "prenom": d.prenom,
-                "groupe_politique_id": d.groupe_politique_id,
-                "departement": d.departement,
-                "nb_interventions": d.nb_interventions,
-            }
-            for d in top_deputes
-        ]
-
-        # --- Activity by group (deputies who talked about this theme) ---
-        par_groupe_query = (
-            db.query(
-                Groupe.nom,
-                Groupe.sigle,
-                func.count(func.distinct(Depute.id)).label("count"),
+            if departement:
+                top_query = top_query.filter(Depute.departement.ilike(f"%{departement}%"))
+            top_deputes = (
+                top_query.group_by(Depute.id)
+                .order_by(func.count(Vote.id).desc())
+                .limit(10)
+                .all()
             )
-            .join(Depute, Depute.groupe_politique_id == Groupe.id)
-            .join(Intervention, Intervention.depute_id == Depute.id)
-        )
-        if theme_filter is not None:
-            par_groupe_query = par_groupe_query.filter(theme_filter)
-        if departement:
-            par_groupe_query = par_groupe_query.filter(Depute.departement.ilike(f"%{departement}%"))
+            top_deputes_list = [
+                {
+                    "id": d.id,
+                    "nom": d.nom,
+                    "prenom": d.prenom,
+                    "groupe_politique_id": d.groupe_politique_id,
+                    "departement": d.departement,
+                    "nb_interventions": d.nb,
+                }
+                for d in top_deputes
+            ]
 
-        par_groupe = par_groupe_query.group_by(Groupe.id, Groupe.nom, Groupe.sigle).all()
+            # Distinct deputies per group who voted on theme-matching scrutins
+            par_groupe_query = (
+                db.query(
+                    Groupe.nom,
+                    Groupe.sigle,
+                    func.count(func.distinct(Depute.id)).label("count"),
+                )
+                .join(Depute, Depute.groupe_politique_id == Groupe.id)
+                .join(Vote, Vote.depute_id == Depute.id)
+                .join(Scrutin, Scrutin.id == Vote.scrutin_id)
+                .filter(Scrutin.titre.ilike(theme_like))
+            )
+            if departement:
+                par_groupe_query = par_groupe_query.filter(
+                    Depute.departement.ilike(f"%{departement}%")
+                )
+            par_groupe = par_groupe_query.group_by(Groupe.id, Groupe.nom, Groupe.sigle).all()
+
+            timeline_list = _scrutin_timeline(db, theme_like)
+
+            nb_scrutins = (
+                db.query(func.count(Scrutin.id))
+                .filter(Scrutin.titre.ilike(theme_like))
+                .scalar()
+                or 0
+            )
+            nb_dep_q = (
+                db.query(func.count(func.distinct(Depute.id)))
+                .join(Vote, Vote.depute_id == Depute.id)
+                .join(Scrutin, Scrutin.id == Vote.scrutin_id)
+                .filter(Scrutin.titre.ilike(theme_like))
+            )
+            if departement:
+                nb_dep_q = nb_dep_q.filter(Depute.departement.ilike(f"%{departement}%"))
+            nb_deputes = nb_dep_q.scalar() or 0
+            nb_interventions = 0
+
+        else:
+            # --- Default mode: party sizes + all scrutins timeline ---
+            top_deputes_list = []
+            par_groupe = (
+                db.query(
+                    Groupe.nom,
+                    Groupe.sigle,
+                    func.count(Depute.id).label("count"),
+                )
+                .outerjoin(Depute, Depute.groupe_politique_id == Groupe.id)
+                .group_by(Groupe.id, Groupe.nom, Groupe.sigle)
+                .order_by(func.count(Depute.id).desc())
+                .all()
+            )
+            timeline_list = _scrutin_timeline(db, None)
+
+            depute_query = db.query(Depute)
+            if departement:
+                depute_query = depute_query.filter(Depute.departement.ilike(f"%{departement}%"))
+            nb_deputes = depute_query.count()
+            nb_interventions = db.query(func.count(Intervention.id)).scalar() or 0
+            nb_scrutins = db.query(func.count(Scrutin.id)).scalar() or 0
 
         par_groupe_list = [
             {
@@ -113,66 +174,6 @@ def get_dashboard(
             }
             for g in par_groupe
         ]
-
-        # --- Timeline (interventions per month, filtered by theme) ---
-        timeline_list = []
-        try:
-            tl_query = (
-                db.query(
-                    extract("year", Intervention.date).label("year"),
-                    extract("month", Intervention.date).label("month"),
-                    func.count(Intervention.id).label("count"),
-                )
-                .filter(Intervention.date.isnot(None))
-            )
-            if theme_filter is not None:
-                tl_query = tl_query.filter(theme_filter)
-
-            timeline = (
-                tl_query.group_by("year", "month")
-                .order_by("year", "month")
-                .all()
-            )
-            timeline_list = [
-                {
-                    "period": f"{int(t.year)}-{int(t.month):02d}",
-                    "count": t.count,
-                }
-                for t in timeline
-            ]
-        except Exception:
-            db.rollback()
-            logger.warning("Failed to fetch timeline data")
-
-        # --- Stats (all filtered by theme + departement) ---
-        if theme:
-            interv_q = db.query(Intervention).filter(Intervention.texte.ilike(f"%{theme}%"))
-            if departement:
-                interv_q = interv_q.join(Depute, Depute.id == Intervention.depute_id).filter(
-                    Depute.departement.ilike(f"%{departement}%")
-                )
-            nb_interventions = interv_q.count()
-
-            dep_q = (
-                db.query(func.count(func.distinct(Intervention.depute_id)))
-                .filter(Intervention.texte.ilike(f"%{theme}%"))
-            )
-            if departement:
-                dep_q = dep_q.join(Depute, Depute.id == Intervention.depute_id).filter(
-                    Depute.departement.ilike(f"%{departement}%")
-                )
-            nb_deputes = dep_q.scalar() or 0
-
-            nb_scrutins = db.query(func.count(Scrutin.id)).filter(
-                Scrutin.titre.ilike(f"%{theme}%")
-            ).scalar() or 0
-        else:
-            depute_query = db.query(Depute)
-            if departement:
-                depute_query = depute_query.filter(Depute.departement.ilike(f"%{departement}%"))
-            nb_deputes = depute_query.count()
-            nb_interventions = db.query(func.count(Intervention.id)).scalar() or 0
-            nb_scrutins = db.query(func.count(Scrutin.id)).scalar() or 0
 
         result = {
             "stats": {
@@ -210,39 +211,52 @@ def get_dashboard_geo(
         return cached
 
     try:
-        query = (
-            db.query(
-                Depute.departement,
-                func.count(func.distinct(Depute.id)).label("nb_deputes_actifs"),
-                func.count(Intervention.id).label("nb_interventions"),
-            )
-            # Outer join: a department must still appear on the map even when it
-            # has deputies but no interventions yet (e.g. real data without CR).
-            .outerjoin(Intervention, Intervention.depute_id == Depute.id)
-            .filter(Depute.departement.isnot(None))
-        )
+        theme_like = f"%{theme}%" if theme else None
 
         if theme:
-            query = query.filter(Intervention.texte.ilike(f"%{theme}%"))
+            # Theme mode: deputies per department active on matching scrutins (votes)
+            query = (
+                db.query(
+                    Depute.departement,
+                    func.count(func.distinct(Depute.id)).label("nb_deputes_actifs"),
+                    func.count(Vote.id).label("nb_interventions"),
+                )
+                .join(Vote, Vote.depute_id == Depute.id)
+                .join(Scrutin, Scrutin.id == Vote.scrutin_id)
+                .filter(Depute.departement.isnot(None))
+                .filter(Scrutin.titre.ilike(theme_like))
+                .group_by(Depute.departement)
+            )
+        else:
+            # Default: all deputies per department (outer join keeps every dept)
+            query = (
+                db.query(
+                    Depute.departement,
+                    func.count(func.distinct(Depute.id)).label("nb_deputes_actifs"),
+                    func.count(Intervention.id).label("nb_interventions"),
+                )
+                .outerjoin(Intervention, Intervention.depute_id == Depute.id)
+                .filter(Depute.departement.isnot(None))
+                .group_by(Depute.departement)
+            )
 
-        query = query.group_by(Depute.departement)
         results = query.all()
 
         geo_data = []
         for r in results:
             top = (
                 db.query(Depute.nom, Depute.prenom)
-                .outerjoin(Intervention, Intervention.depute_id == Depute.id)
                 .filter(Depute.departement == r.departement)
-                .group_by(Depute.id, Depute.nom, Depute.prenom)
-                .order_by(func.count(Intervention.id).desc())
+                .order_by(Depute.nom)
                 .first()
             )
             geo_data.append({
                 "departement": r.departement,
                 "nom": r.departement,
                 "nb_deputes_actifs": r.nb_deputes_actifs,
-                "nb_interventions": r.nb_interventions,
+                # In theme mode this holds the vote count on matching scrutins; the
+                # map colours by nb_deputes_actifs when interventions are absent.
+                "nb_interventions": 0,
                 "top_depute": f"{top.prenom} {top.nom}" if top else None,
             })
 

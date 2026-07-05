@@ -13,7 +13,6 @@ from ..models.depute import Depute
 from ..models.groupe import Groupe
 from ..models.intervention import Intervention
 from ..models.scrutin import Scrutin
-from ..models.vote import Vote
 
 logger = logging.getLogger(__name__)
 
@@ -69,10 +68,10 @@ def get_dashboard(
         theme_like = f"%{theme}%" if theme else None
 
         if theme:
-            # --- Theme mode: aggregate from scrutins (title) + their votes ---
-            # A depute is "active on the theme" if they voted on a matching scrutin.
+            # --- Theme mode: aggregate from interventions (speeches) on the theme ---
+            theme_iv = Intervention.texte.ilike(theme_like)
 
-            # Top 10 deputies by number of votes cast on theme-matching scrutins
+            # Top 10 deputies by number of interventions mentioning the theme
             top_query = (
                 db.query(
                     Depute.id,
@@ -80,17 +79,16 @@ def get_dashboard(
                     Depute.prenom,
                     Depute.groupe_politique_id,
                     Depute.departement,
-                    func.count(Vote.id).label("nb"),
+                    func.count(Intervention.id).label("nb"),
                 )
-                .join(Vote, Vote.depute_id == Depute.id)
-                .join(Scrutin, Scrutin.id == Vote.scrutin_id)
-                .filter(Scrutin.titre.ilike(theme_like))
+                .join(Intervention, Intervention.depute_id == Depute.id)
+                .filter(theme_iv)
             )
             if departement:
                 top_query = top_query.filter(Depute.departement.ilike(f"%{departement}%"))
             top_deputes = (
                 top_query.group_by(Depute.id)
-                .order_by(func.count(Vote.id).desc())
+                .order_by(func.count(Intervention.id).desc())
                 .limit(10)
                 .all()
             )
@@ -106,7 +104,7 @@ def get_dashboard(
                 for d in top_deputes
             ]
 
-            # Distinct deputies per group who voted on theme-matching scrutins
+            # Distinct deputies per group who spoke about the theme
             par_groupe_query = (
                 db.query(
                     Groupe.nom,
@@ -114,9 +112,8 @@ def get_dashboard(
                     func.count(func.distinct(Depute.id)).label("count"),
                 )
                 .join(Depute, Depute.groupe_politique_id == Groupe.id)
-                .join(Vote, Vote.depute_id == Depute.id)
-                .join(Scrutin, Scrutin.id == Vote.scrutin_id)
-                .filter(Scrutin.titre.ilike(theme_like))
+                .join(Intervention, Intervention.depute_id == Depute.id)
+                .filter(theme_iv)
             )
             if departement:
                 par_groupe_query = par_groupe_query.filter(
@@ -124,24 +121,43 @@ def get_dashboard(
                 )
             par_groupe = par_groupe_query.group_by(Groupe.id, Groupe.nom, Groupe.sigle).all()
 
-            timeline_list = _scrutin_timeline(db, theme_like)
+            # Timeline: interventions on the theme, per month
+            tl = (
+                db.query(
+                    extract("year", Intervention.date).label("year"),
+                    extract("month", Intervention.date).label("month"),
+                    func.count(Intervention.id).label("count"),
+                )
+                .filter(Intervention.date.isnot(None))
+                .filter(theme_iv)
+                .group_by("year", "month")
+                .order_by("year", "month")
+                .all()
+            )
+            timeline_list = [
+                {"period": f"{int(t.year)}-{int(t.month):02d}", "count": t.count}
+                for t in tl
+            ]
 
+            nb_iv_q = db.query(func.count(Intervention.id)).filter(theme_iv)
+            nb_dep_q = db.query(
+                func.count(func.distinct(Intervention.depute_id))
+            ).filter(theme_iv)
+            if departement:
+                nb_iv_q = nb_iv_q.join(
+                    Depute, Depute.id == Intervention.depute_id
+                ).filter(Depute.departement.ilike(f"%{departement}%"))
+                nb_dep_q = nb_dep_q.join(
+                    Depute, Depute.id == Intervention.depute_id
+                ).filter(Depute.departement.ilike(f"%{departement}%"))
+            nb_interventions = nb_iv_q.scalar() or 0
+            nb_deputes = nb_dep_q.scalar() or 0
             nb_scrutins = (
                 db.query(func.count(Scrutin.id))
                 .filter(Scrutin.titre.ilike(theme_like))
                 .scalar()
                 or 0
             )
-            nb_dep_q = (
-                db.query(func.count(func.distinct(Depute.id)))
-                .join(Vote, Vote.depute_id == Depute.id)
-                .join(Scrutin, Scrutin.id == Vote.scrutin_id)
-                .filter(Scrutin.titre.ilike(theme_like))
-            )
-            if departement:
-                nb_dep_q = nb_dep_q.filter(Depute.departement.ilike(f"%{departement}%"))
-            nb_deputes = nb_dep_q.scalar() or 0
-            nb_interventions = 0
 
         else:
             # --- Default mode: party sizes + all scrutins timeline ---
@@ -214,17 +230,16 @@ def get_dashboard_geo(
         theme_like = f"%{theme}%" if theme else None
 
         if theme:
-            # Theme mode: deputies per department active on matching scrutins (votes)
+            # Theme mode: interventions on the theme, per department (map heatmap)
             query = (
                 db.query(
                     Depute.departement,
                     func.count(func.distinct(Depute.id)).label("nb_deputes_actifs"),
-                    func.count(Vote.id).label("nb_interventions"),
+                    func.count(Intervention.id).label("nb_interventions"),
                 )
-                .join(Vote, Vote.depute_id == Depute.id)
-                .join(Scrutin, Scrutin.id == Vote.scrutin_id)
+                .join(Intervention, Intervention.depute_id == Depute.id)
                 .filter(Depute.departement.isnot(None))
-                .filter(Scrutin.titre.ilike(theme_like))
+                .filter(Intervention.texte.ilike(theme_like))
                 .group_by(Depute.departement)
             )
         else:
@@ -254,9 +269,9 @@ def get_dashboard_geo(
                 "departement": r.departement,
                 "nom": r.departement,
                 "nb_deputes_actifs": r.nb_deputes_actifs,
-                # In theme mode this holds the vote count on matching scrutins; the
-                # map colours by nb_deputes_actifs when interventions are absent.
-                "nb_interventions": 0,
+                # Theme mode: interventions on the theme (colours the heatmap).
+                # Default mode: 0 so the map colours by number of deputies.
+                "nb_interventions": r.nb_interventions if theme else 0,
                 "top_depute": f"{top.prenom} {top.nom}" if top else None,
             })
 

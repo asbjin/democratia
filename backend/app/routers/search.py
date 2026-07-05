@@ -24,9 +24,9 @@ def search_interventions(
     db: Session = Depends(get_db),
 ):
     logger.info(f"GET /search q={q} page={page}")
-    # Expand query with parliamentary synonyms
+    # Expand query with parliamentary synonyms (already a valid tsquery string)
     expanded = get_tsquery_expanded(q)
-    ts_query = func.to_tsquery("french", func.unaccent(expanded.replace(" ", " & ")))
+    ts_query = func.to_tsquery("french", func.unaccent(expanded))
 
     query = (
         db.query(

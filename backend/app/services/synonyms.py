@@ -1,5 +1,6 @@
 # DemocratIA - Parliamentary synonym dictionary
 
+import re
 from typing import Dict, List
 
 # Maps a search term to related terms used in parliamentary debate
@@ -93,5 +94,13 @@ def get_tsquery_expanded(query: str) -> str:
         A ts_query-compatible string with synonyms OR'd together.
     """
     expanded = expand_query(query)
-    # Join with OR operator for full-text search
-    return " | ".join(expanded)
+    # Each term becomes its words AND'd together; terms are OR'd. Tokenising on
+    # word characters avoids invalid tsquery syntax from spaces/apostrophes.
+    parts = []
+    for term in expanded:
+        words = re.findall(r"\w+", term, flags=re.UNICODE)
+        if words:
+            parts.append(" & ".join(words))
+    if parts:
+        return " | ".join(parts)
+    return re.sub(r"\W+", " ", query).strip()

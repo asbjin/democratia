@@ -216,7 +216,9 @@ def get_dashboard_geo(
                 func.count(func.distinct(Depute.id)).label("nb_deputes_actifs"),
                 func.count(Intervention.id).label("nb_interventions"),
             )
-            .join(Intervention, Intervention.depute_id == Depute.id)
+            # Outer join: a department must still appear on the map even when it
+            # has deputies but no interventions yet (e.g. real data without CR).
+            .outerjoin(Intervention, Intervention.depute_id == Depute.id)
             .filter(Depute.departement.isnot(None))
         )
 
@@ -230,7 +232,7 @@ def get_dashboard_geo(
         for r in results:
             top = (
                 db.query(Depute.nom, Depute.prenom)
-                .join(Intervention, Intervention.depute_id == Depute.id)
+                .outerjoin(Intervention, Intervention.depute_id == Depute.id)
                 .filter(Depute.departement == r.departement)
                 .group_by(Depute.id, Depute.nom, Depute.prenom)
                 .order_by(func.count(Intervention.id).desc())

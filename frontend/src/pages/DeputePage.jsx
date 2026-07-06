@@ -290,6 +290,7 @@ function DeputePage() {
                             text={intervention.texte}
                             interventionId={intervention.id}
                             context={`Intervention de ${depute.prenom} ${depute.nom}`}
+                            theme={filter || undefined}
                           />
                         </li>
                       ))}
@@ -420,6 +421,7 @@ function DeputePage() {
                             text={intervention.texte}
                             interventionId={intervention.id}
                             context={`Intervention de ${depute.prenom} ${depute.nom}`}
+                            theme={filter || undefined}
                           />
                         </li>
                       ))}

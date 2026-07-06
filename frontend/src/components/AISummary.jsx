@@ -4,7 +4,7 @@ import api from "../services/api";
 // En dessous de ce nombre de mots, le texte est deja court : inutile de resumer.
 const MIN_WORDS = 40;
 
-function AISummary({ text, interventionId, context }) {
+function AISummary({ text, interventionId, context, theme }) {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -23,6 +23,7 @@ function AISummary({ text, interventionId, context }) {
         text,
         intervention_id: interventionId,
         context: context || "",
+        theme: theme || "",
       })
       .then((res) => setSummary(res.data))
       .catch(() => setError("Erreur lors de la generation"))

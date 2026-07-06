@@ -17,6 +17,10 @@ router = APIRouter()
 
 LLM_MODEL = "llama-3.3-70b-versatile"
 
+# En dessous de ce nombre de mots, resumer n'a pas de sens (le resume serait
+# plus long que la source) : on renvoie le texte tel quel sans appeler le LLM.
+MIN_SUMMARY_WORDS = 40
+
 
 class ResumeRequest(BaseModel):
     intervention_id: Optional[str] = None
@@ -63,6 +67,10 @@ def generate_resume(req: ResumeRequest, db: Session = Depends(get_db)):
     if not text:
         raise HTTPException(status_code=400, detail="No text available")
 
+    # Garde-fou : texte deja court -> pas de resume (plus rapide, pas d'appel LLM)
+    if len(text.split()) < MIN_SUMMARY_WORDS:
+        return {"resume": text.strip(), "cached": False, "short": True}
+
     # Call LLM
     client = _get_llm_client()
     system_prompt = (
@@ -70,14 +78,18 @@ def generate_resume(req: ResumeRequest, db: Session = Depends(get_db)):
         "parlementaire francaise. Ton role est de rendre les textes legislatifs "
         "et les debats accessibles a tous les citoyens."
     )
-    user_prompt = "Resume le texte parlementaire suivant en 3 a 5 phrases claires et accessibles.\n\n"
+    user_prompt = (
+        "Resume le texte parlementaire suivant en 1 a 2 phrases claires et "
+        "accessibles, plus courtes que le texte d'origine. Donne uniquement le "
+        "resume, sans phrase d'introduction.\n\n"
+    )
     if req.context:
         user_prompt += f"Contexte : {req.context}\n\n"
     user_prompt += f"Texte :\n{text}"
 
     response = client.chat.completions.create(
         model=LLM_MODEL,
-        max_tokens=500,
+        max_tokens=160,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},

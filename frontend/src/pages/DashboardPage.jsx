@@ -177,6 +177,7 @@ function DashboardPage() {
                 key={d.id}
                 depute={d}
                 groupes={groupes}
+                query={query || undefined}
                 countLabel={query ? "interventions sur ce theme" : "interventions"}
               />
             ))}

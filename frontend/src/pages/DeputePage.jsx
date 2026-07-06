@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import api from "../services/api";
 import AISummary from "../components/AISummary";
 import SentimentBadge from "../components/SentimentBadge";
@@ -13,6 +13,9 @@ const TABS = [
 
 function DeputePage() {
   const { id } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [filter, setFilter] = useState(searchParams.get("q") || "");
+  const [searchInput, setSearchInput] = useState(searchParams.get("q") || "");
   const [depute, setDepute] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -39,12 +42,13 @@ function DeputePage() {
       .finally(() => setLoading(false));
   }, [id]);
 
-  // Eagerly load activite and votes on mount for indicators
+  // Load activite and votes (optionally filtered by the active search term)
   useEffect(() => {
     if (!depute) return;
+    const params = filter ? { theme: filter } : {};
 
     api
-      .get(`/deputes/${id}/activite`)
+      .get(`/deputes/${id}/activite`, { params })
       .then((res) => setActivite(res.data))
       .catch(() =>
         setActivite({
@@ -59,10 +63,23 @@ function DeputePage() {
       );
 
     api
-      .get(`/deputes/${id}/votes`)
+      .get(`/deputes/${id}/votes`, { params })
       .then((res) => setVotes(res.data))
       .catch(() => setVotes({ total: 0, items: [] }));
-  }, [id, depute]);
+  }, [id, depute, filter]);
+
+  const applyFilter = (e) => {
+    e.preventDefault();
+    const v = searchInput.trim();
+    setFilter(v);
+    setSearchParams(v ? { q: v } : {});
+  };
+
+  const clearFilter = () => {
+    setSearchInput("");
+    setFilter("");
+    setSearchParams({});
+  };
 
   // Handle tab-specific loading states
   useEffect(() => {
@@ -103,10 +120,42 @@ function DeputePage() {
     <div className="max-w-5xl mx-auto px-4 py-8">
       <Link
         to="/dashboard"
-        className="text-accent hover:underline text-sm mb-6 block"
+        className="text-accent hover:underline text-sm mb-4 block"
       >
         &larr; Retour au dashboard
       </Link>
+
+      {/* Search bar to filter this deputy's activity */}
+      <form onSubmit={applyFilter} className="flex gap-2 mb-3">
+        <input
+          type="text"
+          value={searchInput}
+          onChange={(e) => setSearchInput(e.target.value)}
+          placeholder={`Filtrer l'activite de ${depute.prenom} ${depute.nom}...`}
+          className="flex-1 px-4 py-2 rounded-lg border-2 border-accent focus:outline-none focus:border-primary text-gray-700"
+        />
+        <button
+          type="submit"
+          className="px-5 py-2 bg-accent text-white font-semibold rounded-lg hover:bg-primary transition-colors"
+        >
+          Rechercher
+        </button>
+        {filter && (
+          <button
+            type="button"
+            onClick={clearFilter}
+            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            Tout afficher
+          </button>
+        )}
+      </form>
+
+      {filter && (
+        <div className="mb-4 text-sm bg-blue-50 text-primary rounded-lg px-4 py-2">
+          Activite filtree sur &laquo; <strong>{filter}</strong> &raquo;
+        </div>
+      )}
 
       {/* Header */}
       <div className="bg-white rounded-lg shadow-lg p-8 mb-6">

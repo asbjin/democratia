@@ -1,12 +1,15 @@
 import { Link } from "react-router-dom";
 
-function DeputeCard({ depute, groupes, countLabel = "interventions" }) {
+function DeputeCard({ depute, groupes, countLabel = "interventions", query }) {
   const groupe = groupes?.[depute.groupe_politique_id];
   const groupeLabel = groupe?.sigle || groupe?.nom || depute.groupe_politique_id;
+  const to = query
+    ? `/depute/${depute.id}?q=${encodeURIComponent(query)}`
+    : `/depute/${depute.id}`;
 
   return (
     <Link
-      to={`/depute/${depute.id}`}
+      to={to}
       className="block bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-5"
     >
       <div className="flex items-center justify-between mb-2">

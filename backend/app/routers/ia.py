@@ -26,6 +26,7 @@ class ResumeRequest(BaseModel):
     intervention_id: Optional[str] = None
     text: Optional[str] = None
     context: str = ""
+    theme: str = ""
 
 
 class SentimentRequest(BaseModel):
@@ -50,7 +51,8 @@ def generate_resume(req: ResumeRequest, db: Session = Depends(get_db)):
     # Check cache if intervention_id provided
     if intervention_id:
         cached = db.query(ResumeCache).filter(
-            ResumeCache.intervention_id == intervention_id
+            ResumeCache.intervention_id == intervention_id,
+            ResumeCache.theme == req.theme,
         ).first()
         if cached:
             return {"resume": cached.resume_text, "cached": True}
@@ -78,11 +80,19 @@ def generate_resume(req: ResumeRequest, db: Session = Depends(get_db)):
         "parlementaire francaise. Ton role est de rendre les textes legislatifs "
         "et les debats accessibles a tous les citoyens."
     )
-    user_prompt = (
-        "Resume le texte parlementaire suivant en 1 a 2 phrases claires et "
-        "accessibles, plus courtes que le texte d'origine. Donne uniquement le "
-        "resume, sans phrase d'introduction.\n\n"
-    )
+    if req.theme:
+        # Resume cible sur le sujet recherche (aide la recherche thematique)
+        user_prompt = (
+            f'En 1 a 2 phrases claires et accessibles, resume ce que dit ce texte '
+            f'au sujet de "{req.theme}". Donne uniquement le resume, sans phrase '
+            f"d'introduction.\n\n"
+        )
+    else:
+        user_prompt = (
+            "Resume le texte parlementaire suivant en 1 a 2 phrases claires et "
+            "accessibles, plus courtes que le texte d'origine. Donne uniquement le "
+            "resume, sans phrase d'introduction.\n\n"
+        )
     if req.context:
         user_prompt += f"Contexte : {req.context}\n\n"
     user_prompt += f"Texte :\n{text}"
@@ -101,6 +111,7 @@ def generate_resume(req: ResumeRequest, db: Session = Depends(get_db)):
     if intervention_id:
         cache_entry = ResumeCache(
             intervention_id=intervention_id,
+            theme=req.theme,
             resume_text=resume_text,
         )
         db.add(cache_entry)

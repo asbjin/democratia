@@ -55,7 +55,7 @@ function GroupesPage() {
           return (
             <button
               key={groupe.id}
-              onClick={() => navigate(`/dashboard?q=&groupe=${groupe.id}`)}
+              onClick={() => navigate(`/groupes/${groupe.id}`)}
               className="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow p-6 text-left"
             >
               <div className="flex items-center gap-4 mb-4">

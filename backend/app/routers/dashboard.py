@@ -159,6 +159,62 @@ def get_dashboard(
                 or 0
             )
 
+        elif departement:
+            # --- Department mode (no theme): activity of that department's deputies ---
+            dep_like = f"%{departement}%"
+
+            top_query = (
+                db.query(
+                    Depute.id, Depute.nom, Depute.prenom,
+                    Depute.groupe_politique_id, Depute.departement,
+                    func.count(Intervention.id).label("nb"),
+                )
+                .outerjoin(Intervention, Intervention.depute_id == Depute.id)
+                .filter(Depute.departement.ilike(dep_like))
+                .group_by(Depute.id)
+                .order_by(func.count(Intervention.id).desc())
+                .limit(10)
+            )
+            top_deputes_list = [
+                {"id": d.id, "nom": d.nom, "prenom": d.prenom,
+                 "groupe_politique_id": d.groupe_politique_id,
+                 "departement": d.departement, "nb_interventions": d.nb}
+                for d in top_query.all()
+            ]
+
+            par_groupe = (
+                db.query(Groupe.nom, Groupe.sigle, func.count(func.distinct(Depute.id)).label("count"))
+                .join(Depute, Depute.groupe_politique_id == Groupe.id)
+                .filter(Depute.departement.ilike(dep_like))
+                .group_by(Groupe.id, Groupe.nom, Groupe.sigle)
+                .order_by(func.count(func.distinct(Depute.id)).desc())
+                .all()
+            )
+
+            tl = (
+                db.query(
+                    extract("year", Intervention.date).label("year"),
+                    extract("month", Intervention.date).label("month"),
+                    func.count(Intervention.id).label("count"),
+                )
+                .join(Depute, Depute.id == Intervention.depute_id)
+                .filter(Intervention.date.isnot(None))
+                .filter(Depute.departement.ilike(dep_like))
+                .group_by("year", "month").order_by("year", "month").all()
+            )
+            timeline_list = [
+                {"period": f"{int(t.year)}-{int(t.month):02d}", "count": t.count} for t in tl
+            ]
+
+            nb_deputes = db.query(Depute).filter(Depute.departement.ilike(dep_like)).count()
+            nb_interventions = (
+                db.query(func.count(Intervention.id))
+                .join(Depute, Depute.id == Intervention.depute_id)
+                .filter(Depute.departement.ilike(dep_like))
+                .scalar() or 0
+            )
+            nb_scrutins = db.query(func.count(Scrutin.id)).scalar() or 0
+
         else:
             # --- Default mode: party sizes + all scrutins timeline ---
             top_deputes_list = []
@@ -175,10 +231,7 @@ def get_dashboard(
             )
             timeline_list = _scrutin_timeline(db, None)
 
-            depute_query = db.query(Depute)
-            if departement:
-                depute_query = depute_query.filter(Depute.departement.ilike(f"%{departement}%"))
-            nb_deputes = depute_query.count()
+            nb_deputes = db.query(Depute).count()
             nb_interventions = db.query(func.count(Intervention.id)).scalar() or 0
             nb_scrutins = db.query(func.count(Scrutin.id)).scalar() or 0
 

@@ -152,6 +152,7 @@ def get_depute_activite(
 @router.get("/deputes/{depute_id}/votes")
 def get_depute_votes(
     depute_id: str,
+    theme: Optional[str] = None,
     page: int = Query(1, ge=1),
     size: int = Query(20, ge=1, le=100),
     db: Session = Depends(get_db),
@@ -184,6 +185,10 @@ def get_depute_votes(
         )
         .join(Scrutin, Scrutin.id == subquery.c.scrutin_id)
     )
+    if theme:
+        query = query.filter(
+            func.unaccent(Scrutin.titre).ilike(func.unaccent(f"%{theme}%"))
+        )
     total = query.count()
     results = query.order_by(Scrutin.date.desc()).offset((page - 1) * size).limit(size).all()
 

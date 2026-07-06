@@ -69,7 +69,11 @@ def get_dashboard(
 
         if theme:
             # --- Theme mode: aggregate from interventions (speeches) on the theme ---
-            theme_iv = Intervention.texte.ilike(theme_like)
+            # Full-text match (whole word, accent-insensitive) instead of a naive
+            # substring, which caught noise like "aplomb"/"Naples" for "apl".
+            theme_iv = Intervention.search_vector.op("@@")(
+                func.plainto_tsquery("french", func.unaccent(theme))
+            )
 
             # Top 10 deputies by number of interventions mentioning the theme
             top_query = (
@@ -292,7 +296,9 @@ def get_dashboard_geo(
                 )
                 .join(Intervention, Intervention.depute_id == Depute.id)
                 .filter(Depute.departement.isnot(None))
-                .filter(Intervention.texte.ilike(theme_like))
+                .filter(Intervention.search_vector.op("@@")(
+                    func.plainto_tsquery("french", func.unaccent(theme))
+                ))
                 .group_by(Depute.departement)
             )
         else:

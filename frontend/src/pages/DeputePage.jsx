@@ -81,6 +81,9 @@ function DeputePage() {
     setSearchParams({});
   };
 
+  // Le retour au dashboard conserve le filtre actif (persistance de la recherche)
+  const backTo = filter ? `/dashboard?q=${encodeURIComponent(filter)}` : "/dashboard";
+
   // Handle tab-specific loading states
   useEffect(() => {
     if (!depute) return;
@@ -109,7 +112,7 @@ function DeputePage() {
     return (
       <div className="max-w-4xl mx-auto px-4 py-10 text-center">
         <p className="text-red-500 text-lg">{error || "Depute non trouve"}</p>
-        <Link to="/dashboard" className="text-accent underline mt-4 block">
+        <Link to={backTo} className="text-accent underline mt-4 block">
           Retour au dashboard
         </Link>
       </div>
@@ -119,7 +122,7 @@ function DeputePage() {
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
       <Link
-        to="/dashboard"
+        to={backTo}
         className="text-accent hover:underline text-sm mb-4 block"
       >
         &larr; Retour au dashboard

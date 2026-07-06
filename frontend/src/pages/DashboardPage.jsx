@@ -153,6 +153,7 @@ function DashboardPage() {
         <MapView
           onDepartmentClick={(dept) => setDepartement(dept)}
           theme={query || undefined}
+          departement={departement || undefined}
         />
         {data?.par_groupe?.length > 0 && <ActivityChart data={data.par_groupe} />}
       </div>

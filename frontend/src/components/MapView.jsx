@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, GeoJSON } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
+import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import api from "../services/api";
 
@@ -39,7 +40,32 @@ function getColor(value, scale) {
   return COLORS[COLORS.length - 1];
 }
 
-function MapView({ onDepartmentClick, theme }) {
+// Recentre / dézoome la carte selon le département filtré
+function FitBounds({ geoData, departement }) {
+  const map = useMap();
+  useEffect(() => {
+    if (!map) return;
+    if (!departement) {
+      map.setView(FRANCE_CENTER, FRANCE_ZOOM);
+      return;
+    }
+    if (!geoData) return;
+    const sel = stripAccents(departement);
+    const feat = geoData.features.find(
+      (f) => stripAccents(f.properties.nom || "") === sel
+    );
+    if (feat) {
+      try {
+        map.fitBounds(L.geoJSON(feat).getBounds(), { padding: [20, 20], maxZoom: 9 });
+      } catch (e) {
+        /* ignore invalid geometry */
+      }
+    }
+  }, [map, geoData, departement]);
+  return null;
+}
+
+function MapView({ onDepartmentClick, theme, departement }) {
   const [geoData, setGeoData] = useState(null);
   const [activityData, setActivityData] = useState({});
 
@@ -85,18 +111,21 @@ function MapView({ onDepartmentClick, theme }) {
   const metricLabel = hasInterventions ? "Interventions" : "Deputes actifs";
 
   const scale = buildDynamicScale(activityData, metricKey);
+  const selNom = departement ? stripAccents(departement) : null;
 
   const style = (feature) => {
     const nom = stripAccents(feature.properties.nom || feature.properties.code || "");
     const info = activityData[nom] || {};
     const nb = info[metricKey] || 0;
+    const isSelected = selNom && nom === selNom;
 
     return {
       fillColor: getColor(nb, scale),
-      weight: 1,
+      weight: isSelected ? 3 : 1,
       opacity: 1,
-      color: "#fff",
-      fillOpacity: 0.8,
+      color: isSelected ? "#1E2A44" : "#fff",
+      // Quand un département est filtré, on estompe les autres pour le mettre en avant
+      fillOpacity: selNom ? (isSelected ? 0.95 : 0.3) : 0.8,
     };
   };
 
@@ -117,7 +146,7 @@ function MapView({ onDepartmentClick, theme }) {
         e.target.setStyle({ weight: 3, color: "#2E86C1", fillOpacity: 0.9 });
       },
       mouseout: (e) => {
-        e.target.setStyle({ weight: 1, color: "#fff", fillOpacity: 0.75 });
+        e.target.setStyle(style(feature));
       },
       click: () => {
         if (onDepartmentClick) onDepartmentClick(nom); // Send unaccented name to match backend
@@ -142,11 +171,12 @@ function MapView({ onDepartmentClick, theme }) {
             attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           />
           <GeoJSON
-            key={JSON.stringify(activityData)}
+            key={(departement || "") + "|" + JSON.stringify(activityData)}
             data={geoData}
             style={style}
             onEachFeature={onEachFeature}
           />
+          <FitBounds geoData={geoData} departement={departement} />
         </MapContainer>
       </div>
       <div className="flex items-center gap-2 mt-3 text-xs text-gray-500 flex-wrap">

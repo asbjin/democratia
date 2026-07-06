@@ -1,10 +1,17 @@
 import { useState } from "react";
 import api from "../services/api";
 
-function AISummary({ text, context }) {
+// En dessous de ce nombre de mots, le texte est deja court : inutile de resumer.
+const MIN_WORDS = 40;
+
+function AISummary({ text, interventionId, context }) {
   const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const wordCount = text ? text.trim().split(/\s+/).filter(Boolean).length : 0;
+  // Pas de bouton de resume pour un texte deja court (regle prof + rapidite)
+  if (wordCount < MIN_WORDS) return null;
 
   const handleGenerate = () => {
     if (loading || summary) return;
@@ -12,7 +19,11 @@ function AISummary({ text, context }) {
     setError(null);
 
     api
-      .post("/ia/resume", { text, context: context || "" })
+      .post("/ia/resume", {
+        text,
+        intervention_id: interventionId,
+        context: context || "",
+      })
       .then((res) => setSummary(res.data))
       .catch(() => setError("Erreur lors de la generation"))
       .finally(() => setLoading(false));

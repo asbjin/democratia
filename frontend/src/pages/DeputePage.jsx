@@ -286,12 +286,11 @@ function DeputePage() {
                             {intervention.texte?.slice(0, 300)}
                             {intervention.texte?.length > 300 ? "..." : ""}
                           </p>
-                          {intervention.texte?.length > 200 && (
-                            <AISummary
-                              text={intervention.texte}
-                              context={`Intervention de ${depute.prenom} ${depute.nom}`}
-                            />
-                          )}
+                          <AISummary
+                            text={intervention.texte}
+                            interventionId={intervention.id}
+                            context={`Intervention de ${depute.prenom} ${depute.nom}`}
+                          />
                         </li>
                       ))}
                     </ul>
@@ -417,12 +416,11 @@ function DeputePage() {
                             {intervention.texte?.slice(0, 200)}
                             {intervention.texte?.length > 200 ? "..." : ""}
                           </p>
-                          {intervention.texte && (
-                            <AISummary
-                              text={intervention.texte}
-                              context={`Intervention de ${depute.prenom} ${depute.nom}`}
-                            />
-                          )}
+                          <AISummary
+                            text={intervention.texte}
+                            interventionId={intervention.id}
+                            context={`Intervention de ${depute.prenom} ${depute.nom}`}
+                          />
                         </li>
                       ))}
                     </ul>

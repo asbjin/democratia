@@ -10,7 +10,7 @@ import VoteBreakdown from "../components/VoteBreakdown";
 import MapView from "../components/MapView";
 
 function DashboardPage() {
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   const query = searchParams.get("q") || "";
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -114,6 +114,17 @@ function DashboardPage() {
           >
             {departement}
             <span className="ml-1 font-bold">&times;</span>
+          </button>
+        )}
+        {(query || departement) && (
+          <button
+            onClick={() => {
+              setDepartement("");
+              setSearchParams({});
+            }}
+            className="ml-auto flex items-center gap-1 px-4 py-1.5 border border-gray-300 rounded-lg text-sm text-gray-600 hover:bg-gray-50 transition-colors"
+          >
+            &#8635; Reinitialiser les filtres
           </button>
         )}
       </div>

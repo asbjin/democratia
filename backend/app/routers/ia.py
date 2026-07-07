@@ -5,7 +5,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException
 from groq import Groq
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from sqlalchemy.orm import Session
 
 from ..database import get_db
@@ -23,6 +23,8 @@ MIN_SUMMARY_WORDS = 40
 
 
 class ResumeRequest(BaseModel):
+    # Accepte un id numerique (le frontend envoie l'id d'intervention en nombre)
+    model_config = ConfigDict(coerce_numbers_to_str=True)
     intervention_id: Optional[str] = None
     text: Optional[str] = None
     context: str = ""
@@ -30,6 +32,7 @@ class ResumeRequest(BaseModel):
 
 
 class SentimentRequest(BaseModel):
+    model_config = ConfigDict(coerce_numbers_to_str=True)
     text: Optional[str] = None
     intervention_id: Optional[str] = None
     theme: str = ""

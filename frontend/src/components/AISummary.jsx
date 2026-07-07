@@ -21,7 +21,7 @@ function AISummary({ text, interventionId, context, theme }) {
     api
       .post("/ia/resume", {
         text,
-        intervention_id: interventionId,
+        intervention_id: interventionId != null ? String(interventionId) : undefined,
         context: context || "",
         theme: theme || "",
       })
